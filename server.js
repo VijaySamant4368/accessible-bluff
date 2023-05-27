@@ -2,41 +2,31 @@ var express =require("express");
 var app = express()
 var http =require("http").createServer(app)
 var io =require("socket.io")(http)
+var serverfn=require('./helpers/ServerFunctions')
 const hbs = require('hbs');
-
-var io=require("socket.io")(http)
 // Set up the view engine to use HBS
 app.set('view engine', 'hbs');
-
 // Set the location of the views directory
 app.set('views', __dirname + '/views');
-
 var Deck=require('./helpers/deck')
-var express = require('express');
 const { Socket } = require("socket.io");
 var router = express.Router();
 const CardDeck =new Deck.Deck()
 CardDeck.shuffle()
-app.get("/home",(req,res)=>
-{
-  res.render('home');
-   // console.log(CardDeck.cards)
-})
-/*app.get("/login",(req,res)=>
-{
-  res.render('login');
-   // console.log(CardDeck.cards)
-})*/
-app.get("/",(req,res)=>
-{
-    var cardset=CardDeck.cards
-  res.render('game',{cardset});
-   // console.log(CardDeck.cards)
-})
+let connectedClients = [];
+var cardset=CardDeck.cards
+app.get('/', (req, res) => {
+  res.render('game');
+});
 var rcount;
 const roomCapacity=2;
 const roomCounts={};
 io.on('connection', (socket) => {
+ // Store the connected client
+ //connectedClients.push(socket.id);
+ connectedClients.push(socket);
+ // Send the partitioned cards to all clients
+
     // Find or create a room with available capacity
     console.log("new connection established a user connected with ID:", socket.id)
 
@@ -47,23 +37,33 @@ io.on('connection', (socket) => {
         break;
       }
     }
-  
+
     // If no room has available capacity, create a new room
     if (!roomId) {
       roomId = socket.id; // Use socket ID as room ID
       roomCounts[roomId] = 0; // Initialize the room count
     }
-  
     // Join the room
     socket.join(roomId);
     roomCounts[roomId]++; // Increment the room count
-    console.log("new user joined connected with roomID:"+roomId+ 'member'+roomCounts[roomId])
-  
+    console.log("new user joined connected with roomID:"+roomId+ 'member'+roomCounts[roomId]) 
     // If the room reaches its capacity, emit a message to restrict further entry
-    if (roomCounts[roomId] >= roomCapacity) {
-      io.to(roomId).emit('roomFull');
+if (roomCounts[roomId] >= roomCapacity) {
+// Execute something else during the 2-second delay
+// Delayed code execution after 4 seconds
+setTimeout(() => {
+  serverfn.delayedCode(cardset, roomCapacity, connectedClients);
+}, 4000);
+// Execute something else during the 2-second delay
+console.log("roomid:"+roomId)
+executeDuringDelay();
     }
-  
+   function executeDuringDelay(){
+      console.log(roomId);
+      io.to(roomId).emit('shufflingCards', 'shuffle');
+      console.log("the cards are shuffling......")
+      // Place your additional code here
+    }
     // Handle socket disconnection
     socket.on('disconnect', () => {
     console.log( " user disconnected with roomID:"+roomId+ 'member'+roomCounts[roomId])
@@ -75,15 +75,52 @@ io.on('connection', (socket) => {
         console.log("room ented")
       }
     });
-
-    socket.on(' customRoomEvent',(card)=>{
-        console.log(card);
-       io.to(roomId).emit('customRoomResponse',' response')
-    });
   });
-
-//
-
+//////
+ /* GameStarts(){
+    let connectedClients = []; // Array of connected clients
+    let currentTurnIndex = 0; // Index of the current turn player
+    
+    io.on('connection', (socket) => {
+      // Add client's socket to the connectedClients array
+      connectedClients.push(socket);
+    
+      // Emit the updated client list to all clients
+      emitClientList();
+    
+      socket.on('disconnect', () => {
+        // Remove client's socket from the connectedClients array
+        connectedClients = connectedClients.filter(client => client !== socket);
+    
+        // Emit the updated client list to all clients
+        emitClientList();
+      });
+    });
+    
+    function emitClientList() {
+      // Create an array of client IDs
+      const clientIds = connectedClients.map(socket => socket.id);
+    
+      // Emit the updated client list to all clients
+      io.emit('updateClientList', clientIds);
+    }
+    
+    function assignTurns() {
+      // Emit the turn order to each client
+      connectedClients.forEach((client, index) => {
+        client.emit('playOrder', index + 1);
+      });
+    }
+    
+    function changeTurn() {
+      currentTurnIndex = (currentTurnIndex + 1) % connectedClients.length;
+      const nextPlayer = connectedClients[currentTurnIndex];
+      
+      // Emit an event to the next player indicating it's their turn
+      nextPlayer.emit('nextTurn');
+    }
+  }*/
+  //////
 http.listen(3000,()=>{ 
     console.log("connected to server");
 }

@@ -21,11 +21,8 @@
   
 <div class="card-container">
   <div class="row">
-   <div class="col-md-12">
- {{#each  cardset}}
-  <div class="card" onclick="stackCards(this)">{{this.suit}}{{this.value}}</div>
-{{/each}}
-  </div>
+    <div class="col-md-12" id="card-container">
+    </div>
   </div>
 </div>
   </section>
@@ -39,11 +36,10 @@
 </div>
   </section>
 
-<section style="width: 115px;">
+<section >
   <div class="newposition"></div>
-  
 </section>
-<section style="margin-top: 100px;margin-left:43.5%"> 
+<section style="margin-top: 50px;margin-left:43.5%"> 
     <div class="oppprofile" style="width: 18rem;height:2rem;">
   <img class=" img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtYqXjw6IR_opev4UADLjT8TPcLmWYQsx_YQ&usqp=CAU " class="card-img-top" alt="...">
   <div class="card-body">
@@ -75,7 +71,6 @@
   position:absolute;
   height: 160px;
   margin-left: 45%;
-
   margin-right: 45%;
   margin-top: 0%;
   }
@@ -87,9 +82,17 @@
   overflow-x: scroll;
   white-space: nowrap;
   margin-top: 108px;
-  
+   position: relative;
   margin-left: 30px;
 }  
+.newposition{
+width: 100px; 
+position:relative;
+margin-top:100px ;
+margin-left: 600px;
+  height: 110px;
+  
+}
 .card {
   font-size:medium;
   display: inline-block;
@@ -99,16 +102,7 @@
   background-color: #ccc;
   border-radius: 10px;
 }
-.newposition{
-position:absolute;
-margin-top:200px ;
-margin-left: 400px;
-margin-right: auto;
 
-top:100px; 
-left:200px; 
-
-}
 .button{
   position:absolute;
   margin-top:0px;
@@ -118,7 +112,7 @@ left:200px;
   width: 500px;
 }
 .oppprofile{
-margin-top: 110px;
+margin-top: 0px;
 }
 .place,.open,.pass{
   
@@ -126,6 +120,29 @@ margin-top: 110px;
   width: 70px;
   height: 50px;
   border-radius: 20px;
+}
+
+.loading-animation {
+  /* Add your loading animation styles here */
+  /* For example, you can use a CSS spinner animation */
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 2s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.text-element {
+  margin-top: 10px;
+  text-align: center;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
  </style>
  <script src="/socket.io/socket.io.js"></script>
@@ -139,32 +156,39 @@ console.log(PlaceClicked)
 })
 function stackCards(card){
   if (PlaceClicked) {
-    card.classList.add('newposition');
-socket.emit('customRoomEvent', card);
+ const newposition = document.querySelector('.newposition');
+    const existingCards = newposition.getElementsByClassName('card');
+    const zIndex = existingCards.length + 1;
+    card.style.position = 'absolute';
+    card.style.top = `${existingCards.length * 0}px`;
+    card.style.zIndex = zIndex;
+    newposition.appendChild(card);
+
   }
   }
+  socket.on('subpartition',(subpartition)=>{
+    console.log("received subpartition:",subpartition);
+    const cardContainer = document.getElementById('card-container');
+    const  newposition =document.getElementById('newposition');
+cardContainer.innerHTML = '';
 
- // const socket = io.connect('http://localhost:3000');
-
-// Join a room
-/*socket.on('connect', () => {
-  socket.emit('joinRoom');
-});*/
-// Receive room messages
-//Handle the 'roomFull' event when the room reaches its capacity
-
-
+    // Loop through each card in the subpartition array
+    subpartition.forEach((card) => {
+      // Create a new card element
+      const newCard = document.createElement('div');
+      newCard.className = 'card';
+      newCard.textContent=card.suit+card.value;
+      newCard.addEventListener('click', function() {
+        stackCards(this);
+      });
+      // Append the card to the card container
+      cardContainer.appendChild(newCard);
+    });
+  });
 // Handle disconnection from the server
 socket.on('disconnect', () => {
   // Handle the disconnection
   console.log('Disconnected from the server.');
 });
-// Emit a custom room event
-
-// Receive a response from the server for the custom room event
-socket.on('customRoomResponse', (response) => {
-  // Handle the response
-  console.log('Received response from the server:', response);
-});
-
  </script>
+ 
