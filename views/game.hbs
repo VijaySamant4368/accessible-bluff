@@ -28,18 +28,31 @@
   </section>
   <section> 
 <div class="button"> 
-<!--<button class="scroll-left-btn" >Scroll Left</button>
-<button class="scroll-right-btn">Scroll Right</button>-->
 <button class="place" >place</button>
-<button class="open">open</button>
+<button class="open" onclick=" opencards()">open</button>
 <button class="pass">pass</button>
 </div>
   </section>
-
 <section >
-  <div class="newposition"></div>
+  <div class="container">
+    <div class="left-section">
+  <input type="text" class="CardDialogue" placeholder="bluff here" name="myInput">
+      <!-- Content for the left section -->
+    </div>
+    <div class="vertical-partition"></div>
+    <div class="newposition">
+      <!-- Content for the middle section -->
+    </div>
+    <div class="vertical-partition"></div>
+    <div class="right-section">
+      <!-- Content for the right section -->
+      <div class="OpenedCards">
+      <!-- Content for the middle section -->
+    </div>
+    </div>
+  </div>
 </section>
-<section style="margin-top: 50px;margin-left:43.5%"> 
+<section style="margin-top: 20px;margin-left:43.5%"> 
     <div class="oppprofile" style="width: 18rem;height:2rem;">
   <img class=" img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtYqXjw6IR_opev4UADLjT8TPcLmWYQsx_YQ&usqp=CAU " class="card-img-top" alt="...">
   <div class="card-body">
@@ -85,13 +98,24 @@
    position: relative;
   margin-left: 30px;
 }  
+.CardDialogue{
+  background-color: aquamarine;
+  width: 300px;
+  margin-left: 0px;
+  height: 110px;
+}
 .newposition{
 width: 100px; 
 position:relative;
-margin-top:100px ;
-margin-left: 600px;
+margin-left: 0px;
   height: 110px;
   
+}
+.OpenedCards{
+  background-color: aquamarine;
+  width: 500px;
+  margin-left: 50px;
+  height: 110px;
 }
 .card {
   font-size:medium;
@@ -140,6 +164,31 @@ margin-top: 0px;
   margin-top: 10px;
   text-align: center;
 }
+.container {
+      display: flex;
+margin-top:100px ;
+    }
+
+    .left-section {
+      flex: 1;
+      padding: 10px;
+    }
+
+    .vertical-partition {
+      width: 1px;
+      
+    }
+    .middle-section {
+      flex: 1;
+      padding: 0px;
+
+    }
+
+    .right-section {
+      flex: 1;
+      padding: 10px;
+
+    }
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -149,13 +198,14 @@ margin-top: 0px;
  <script> 
   var socket =io();
 const PlaceBtn = document.querySelector('.place');
+ var cardcount =0;
 var PlaceClicked;
 PlaceBtn.addEventListener('click',()=>{
 PlaceClicked = true
 console.log(PlaceClicked)
 })
 function stackCards(card){
-  if (PlaceClicked) {
+  if(PlaceClicked){ 
  const newposition = document.querySelector('.newposition');
     const existingCards = newposition.getElementsByClassName('card');
     const zIndex = existingCards.length + 1;
@@ -163,24 +213,109 @@ function stackCards(card){
     card.style.top = `${existingCards.length * 0}px`;
     card.style.zIndex = zIndex;
     newposition.appendChild(card);
+     var cardContent=card.textContent;
+     // console.log(cardcontent);
+ var [suit, ...valueParts] = cardContent.trim().split('');
+var value = valueParts.join('');
 
+console.log("suit:", suit);
+console.log("value:", value);
+
+
+     cardcount = cardcount+1;
+    console.log("cardcound is:",cardcount)
+    socket.emit('SelectedCards',cardcount,suit,value);
+// Get the input element
   }
   }
+
+socket.on('fail',()=>{
+  console.log("you loss");
+});
+
+    socket.on('specificMessage',()=>{
+      console.log("you pressed open");
+    });
+
+
+  var inputElement = document.querySelector('.CardDialogue');
+// Add an event listener to listen for keydown events
+inputElement.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') { // Check if Enter key is pressed
+    var inputValue = event.target.value; // Get the input value
+
+    // Emit the input value to the server
+    socket.emit('inputData', inputValue);
+  }
+});
+ socket.on('CardsBack',(CardStack)=>{
+  console.log("cardstack:",CardStack);
+ })
+socket.on('playOrder', (index )=>{
+console.log("playorder:",index);
+});
+ socket.on('nextTurn',()=>{
+  console.log("next turn comes");
+ }
+ );
+
+  function opencards()
+  { 
+    console.log("open");
+    console.log("cardcount is:",cardcount)
+    socket.emit('opencards');
+  }
+  socket.on('showopencards',(poppedElements)=>{
+    console.log("openedcards:",poppedElements);
+  })
+ function startShufflingEffect() {
+  // Get the card container element
+  //const cardContainer = document.querySelector('.card-container');
+    const cardContainer = document.getElementById('card-container');
+
+  // Create loading animation and text elements
+  const loadingAnimation = document.createElement('div');
+  loadingAnimation.classList.add('loading-animation');
+  const textElement = document.createElement('div');
+  textElement.classList.add('text-element');
+  textElement.textContent = 'Card is shuffling';
+
+  // Append loading animation and text elements to the card container
+ cardContainer.innerHTML = '';
+  cardContainer.appendChild(loadingAnimation);
+  cardContainer.appendChild(textElement);
+
+  // Remove loading animation and text elements after 4 seconds
+  setTimeout(() => {
+    cardContainer.innerHTML = '';
+  }, 3000);
+}
+
+socket.on('shufflingCards',(data)=>
+{
+console.log(data)
+  startShufflingEffect();
+});
   socket.on('subpartition',(subpartition)=>{
     console.log("received subpartition:",subpartition);
     const cardContainer = document.getElementById('card-container');
     const  newposition =document.getElementById('newposition');
-cardContainer.innerHTML = '';
-
+  cardContainer.innerHTML = '';
     // Loop through each card in the subpartition array
     subpartition.forEach((card) => {
       // Create a new card element
       const newCard = document.createElement('div');
       newCard.className = 'card';
       newCard.textContent=card.suit+card.value;
+
       newCard.addEventListener('click', function() {
+   
+
         stackCards(this);
+      
+
       });
+    
       // Append the card to the card container
       cardContainer.appendChild(newCard);
     });

@@ -14,7 +14,14 @@ var router = express.Router();
 const CardDeck =new Deck.Deck()
 CardDeck.shuffle()
 let connectedClients = [];
+let CardCount;
+let currentTurnIndex = 0; // Index of the current turn player
+let userfail=false;
+var CardStack=[];
+var InputValue;
 var cardset=CardDeck.cards
+let clientWhoOpened = null;
+
 app.get('/', (req, res) => {
   res.render('game');
 });
@@ -49,6 +56,8 @@ io.on('connection', (socket) => {
     console.log("new user joined connected with roomID:"+roomId+ 'member'+roomCounts[roomId]) 
     // If the room reaches its capacity, emit a message to restrict further entry
 if (roomCounts[roomId] >= roomCapacity) {
+  emitClientList(connectedClients) ;
+  assignTurns(connectedClients);
 // Execute something else during the 2-second delay
 // Delayed code execution after 4 seconds
 setTimeout(() => {
@@ -64,6 +73,56 @@ executeDuringDelay();
       console.log("the cards are shuffling......")
       // Place your additional code here
     }
+    
+    socket.on('SelectedCards',(cardcount,cardsuit,cardvalue)=>
+  {
+  CardCount=cardcount;
+  var Cardsuit=cardsuit;
+  console.log(cardvalue)
+    CardStack.push(cardvalue);
+   console.log("value:",CardStack);
+  // io.emit('cardd',CardCount)
+  });
+  socket.on('inputData', (inputValue) => {
+    InputValue= inputValue;
+console.log(InputValue);
+
+    // Handle the received data as per your requirements
+  }); 
+ 
+  socket.on('opencards',()=>{
+    clientWhoOpened = socket.id;
+    const Openedclient = connectedClients.find(client => client.id === clientWhoOpened);
+  if (Openedclient) {
+    Openedclient.emit('specificMessage');
+  } else {
+    console.log('Client not found or not connected');
+  }
+const poppedElements = [];
+for (let i = 0; i < CardCount; i++) {
+  if (CardStack.length > 0) {
+    const poppedElement = CardStack.pop();
+    if(poppedElement!=InputValue){
+     userfail=true;
+    }
+
+    poppedElements.push(poppedElement);
+  } else {
+    break; // Stack is empty, exit the loop
+  }
+}
+console.log(userfail)
+if (Openedclient&&userfail) {
+  console.log("cardstackback:",CardStack);
+  Openedclient.emit('CardsBack',CardStack);
+} else {
+  console.log('Client not found or not connected');
+}
+
+console.log("popped elements:",poppedElements)
+io.emit('showopencards',poppedElements)
+  });
+//socket.emit('showopencards',(poppedElements))
     // Handle socket disconnection
     socket.on('disconnect', () => {
     console.log( " user disconnected with roomID:"+roomId+ 'member'+roomCounts[roomId])
@@ -74,14 +133,14 @@ executeDuringDelay();
         delete roomCounts[roomId]; // Remove the room if there are no more users
         console.log("room ented")
       }
-    });
+    })
   });
 //////
- /* GameStarts(){
-    let connectedClients = []; // Array of connected clients
-    let currentTurnIndex = 0; // Index of the current turn player
+ //function GameStarts() {
+   // let connectedClients = []; // Array of connected clients
+    //let currentTurnIndex = 0; // Index of the current turn player
     
-    io.on('connection', (socket) => {
+   /* io.on('connection', (socket) => {
       // Add client's socket to the connectedClients array
       connectedClients.push(socket);
     
@@ -95,23 +154,19 @@ executeDuringDelay();
         // Emit the updated client list to all clients
         emitClientList();
       });
-    });
-    
+    });*/
     function emitClientList() {
       // Create an array of client IDs
       const clientIds = connectedClients.map(socket => socket.id);
-    
       // Emit the updated client list to all clients
-      io.emit('updateClientList', clientIds);
+     // io.emit('updateClientList', clientIds);
     }
-    
     function assignTurns() {
       // Emit the turn order to each client
       connectedClients.forEach((client, index) => {
         client.emit('playOrder', index + 1);
       });
     }
-    
     function changeTurn() {
       currentTurnIndex = (currentTurnIndex + 1) % connectedClients.length;
       const nextPlayer = connectedClients[currentTurnIndex];
@@ -119,7 +174,7 @@ executeDuringDelay();
       // Emit an event to the next player indicating it's their turn
       nextPlayer.emit('nextTurn');
     }
-  }*/
+  //}
   //////
 http.listen(3000,()=>{ 
     console.log("connected to server");
