@@ -16,7 +16,8 @@ CardDeck.shuffle()
 let connectedClients = [];
 let CardCount;
 let currentTurnIndex = 0; // Index of the current turn player
-let userfail=false;
+let playinguser;
+let playinguserfail=false;
 var CardStack=[];
 var InputValue;
 var cardset=CardDeck.cards
@@ -26,17 +27,13 @@ app.get('/', (req, res) => {
   res.render('game');
 });
 var rcount;
-const roomCapacity=2;
+const roomCapacity=2;//set roomcapacity
 const roomCounts={};
 io.on('connection', (socket) => {
  // Store the connected client
- //connectedClients.push(socket.id);
  connectedClients.push(socket);
- // Send the partitioned cards to all clients
-
-    // Find or create a room with available capacity
     console.log("new connection established a user connected with ID:", socket.id)
-
+    // Find or create a room with available capacity
     let roomId;
     for (const [room, count] of Object.entries(roomCounts)) {
       if (count < roomCapacity) {
@@ -58,36 +55,39 @@ io.on('connection', (socket) => {
 if (roomCounts[roomId] >= roomCapacity) {
   emitClientList(connectedClients) ;
   assignTurns(connectedClients);
-// Execute something else during the 2-second delay
 // Delayed code execution after 4 seconds
 setTimeout(() => {
   serverfn.delayedCode(cardset, roomCapacity, connectedClients);
 }, 4000);
-// Execute something else during the 2-second delay
 console.log("roomid:"+roomId)
+// Execute something else during the 2-second delay
 executeDuringDelay();
     }
    function executeDuringDelay(){
       console.log(roomId);
       io.to(roomId).emit('shufflingCards', 'shuffle');
       console.log("the cards are shuffling......")
-      // Place your additional code here
     }
-    
     socket.on('SelectedCards',(cardcount,cardsuit,cardvalue)=>
   {
   CardCount=cardcount;
+  playinguserfail=false;
+  console.log("the cardcount is:",CardCount);
   var Cardsuit=cardsuit;
-  console.log(cardvalue)
     CardStack.push(cardvalue);
    console.log("value:",CardStack);
-  // io.emit('cardd',CardCount)
   });
   socket.on('inputData', (inputValue) => {
+   var clientPlaying= socket.id;
+     playinguser = connectedClients.find(client => client.id === clientPlaying);
+    if (playinguser) {
+      playinguser.emit('specificMessagetoplayinguser');
+    } else {
+      console.log('Client not found or not connected');
+    }
     InputValue= inputValue;
-console.log(InputValue);
+console.log("input:",InputValue);
 
-    // Handle the received data as per your requirements
   }); 
  
   socket.on('opencards',()=>{
@@ -98,32 +98,40 @@ console.log(InputValue);
   } else {
     console.log('Client not found or not connected');
   }
+
 const poppedElements = [];
+playinguserfail=false;
+
 for (let i = 0; i < CardCount; i++) {
   if (CardStack.length > 0) {
     const poppedElement = CardStack.pop();
     if(poppedElement!=InputValue){
-     userfail=true;
+      console.log("popped,input",poppedElement,InputValue);
+     playinguserfail=true;
+   console.log("playinguserfail:",playinguserfail)
     }
-
     poppedElements.push(poppedElement);
   } else {
     break; // Stack is empty, exit the loop
   }
 }
-console.log(userfail)
-if (Openedclient&&userfail) {
+if (playinguserfail) {
   console.log("cardstackback:",CardStack);
-  Openedclient.emit('CardsBack',CardStack);
+  playinguser.emit('CardsBack',CardStack,poppedElements);
+  CardStack=[];
+
+  
 } else {
-  console.log('Client not found or not connected');
+  Openedclient.emit('CardsBack',CardStack,poppedElements);
+  CardStack=[];
+
+
 }
 
 console.log("popped elements:",poppedElements)
 io.emit('showopencards',poppedElements)
   });
-//socket.emit('showopencards',(poppedElements))
-    // Handle socket disconnection
+
     socket.on('disconnect', () => {
     console.log( " user disconnected with roomID:"+roomId+ 'member'+roomCounts[roomId])
       rcount=roomCounts[roomId]; 
@@ -135,26 +143,6 @@ io.emit('showopencards',poppedElements)
       }
     })
   });
-//////
- //function GameStarts() {
-   // let connectedClients = []; // Array of connected clients
-    //let currentTurnIndex = 0; // Index of the current turn player
-    
-   /* io.on('connection', (socket) => {
-      // Add client's socket to the connectedClients array
-      connectedClients.push(socket);
-    
-      // Emit the updated client list to all clients
-      emitClientList();
-    
-      socket.on('disconnect', () => {
-        // Remove client's socket from the connectedClients array
-        connectedClients = connectedClients.filter(client => client !== socket);
-    
-        // Emit the updated client list to all clients
-        emitClientList();
-      });
-    });*/
     function emitClientList() {
       // Create an array of client IDs
       const clientIds = connectedClients.map(socket => socket.id);
@@ -174,8 +162,7 @@ io.emit('showopencards',poppedElements)
       // Emit an event to the next player indicating it's their turn
       nextPlayer.emit('nextTurn');
     }
-  //}
-  //////
+  
 http.listen(3000,()=>{ 
     console.log("connected to server");
 }
