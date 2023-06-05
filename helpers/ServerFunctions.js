@@ -16,9 +16,6 @@ module.exports = {
 delayedCode:(cardset,roomCapacity,connectedClients) =>{
     // Code to be executed after 2 seconds
     const partitionedCards = module.exports.partitionCards(cardset,roomCapacity);
-          
-  // Assuming you have the partitioned array and the client array already assigned with values
-  
   // Iterate over the client array and assign subpartitions to each client
   connectedClients.forEach((client, index) => {
     const subpartition = partitionedCards[index]; // Get the corresponding subpartition

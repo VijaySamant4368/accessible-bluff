@@ -21,7 +21,9 @@ let playinguserfail=false;
 var CardStack=[];
 var SuitStack=[];
 var InputValue;
+var playinguserwon=false;
 var cardset=CardDeck.cards
+//const clientValues = new Map();
 let clientWhoOpened = null;
 app.get('/', (req, res) => {
   res.render('game');
@@ -68,7 +70,7 @@ executeDuringDelay();
       io.to(roomId).emit('shufflingCards', 'shuffle');
       console.log("the cards are shuffling......")
     }
-    socket.on('SelectedCards',(cardcount,cardsuit,cardvalue)=>
+    socket.on('SelectedCards',(cardcount,cardsuit,cardvalue,containerCount)=>
   {
   CardCount=cardcount;
   playinguserfail=false;
@@ -80,6 +82,10 @@ executeDuringDelay();
     CardStack.push(cardvalue);
    console.log("value:",CardStack);
    console.log("suit:",SuitStack);
+   if(containerCount==0){
+    console.log("playinguser won")
+    playinguserwon=true;
+   }
 
   });
   socket.on('inputData', (inputValue) => {
@@ -113,8 +119,9 @@ for (let i = 0; i < CardCount; i++) {
     const poppedSuit = SuitStack.pop();
     const poppedElement = CardStack.pop();
     if(poppedElement!=InputValue){
-      console.log("popped,input",poppedElement,InputValue);
+      console.log("popped element,input",poppedElement,InputValue);
      playinguserfail=true;
+    
    console.log("playinguserfail:",playinguserfail)
     }
     poppedElements.push(poppedElement);
@@ -123,44 +130,27 @@ for (let i = 0; i < CardCount; i++) {
     break; // Stack is empty, exit the loop
   }
 }
+console.log("poppedsuits:",poppedSuits)
 
-/*function combineStacks(poppedElements,CardStack) {
-  const cardsGivingBack = [];
-
-  // Push values from stack1 to the combinedStack
-  while (poppedElements.length > 0) {
-    cardsGivingBack.push(poppedElements.pop());
-  }
-
-  // Push values from stack2 to the combinedStack
-  while (stack2.length > 0) {
-    cardsGivingBack.push(CardStack.pop());
-  }
-
-  return cardsGivingBack;
-}*/
-
-
+io.emit('showopencards',poppedElements,poppedSuits)
 if (playinguserfail) {
+  playinguserwon=false
   console.log("cardstackback:",CardStack);
-  playinguser.emit('CardsBack',CardStack,poppedElements);
-      CardStack=[];
-      SuitStack =[];
-      
-  
+  playinguser.emit('CardsBack',CardStack,poppedElements,SuitStack,poppedSuits);
+  CardStack=[];
+  SuitStack =[];
 } else {
-  Openedclient.emit('CardsBack',CardStack,poppedElements);
+  if(playinguserwon){
+    console.log("playinguser won");
+    playinguser.emit('wonmessage');
+    playinguserwon=false
+  }
+  Openedclient.emit('CardsBack',CardStack,poppedElements,SuitStack,poppedSuits);
   //Openedclient.emit('CardsBack',stackedCards,stackOfSuits);
-
-  
   CardStack=[];
   SuitStack =[];
 }
-console.log("popped elements:",poppedElements)
-console.log("popped suit:",poppedSuits)
-io.emit('showopencards',poppedElements,poppedSuits)
   });
-
     socket.on('disconnect', () => {
     console.log( " user disconnected with roomID:"+roomId+ 'member'+roomCounts[roomId])
       rcount=roomCounts[roomId]; 

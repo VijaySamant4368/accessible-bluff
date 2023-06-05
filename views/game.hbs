@@ -184,6 +184,7 @@ margin-top:100px ;
   var socket =io();
 const PlaceBtn = document.querySelector('.place');
 var PlaceClicked;
+var containerCount;
 let cardcount=0;
 //assign value to placeClicked once placeBtn got clicked
 PlaceBtn.addEventListener('click',()=>{
@@ -193,13 +194,17 @@ console.log(PlaceClicked)
 //   Add an event listener to listen for click event , move clicked cards to the newposition and stack it over there as one by one 
 function stackCards(card){
   if(PlaceClicked){ 
- const newposition = document.querySelector('.newposition');
+    const Containercontent = document.getElementById('card-container');
+    const newposition = document.querySelector('.newposition');
     const existingCards = newposition.getElementsByClassName('card');
     const zIndex = existingCards.length + 1;
     card.style.position = 'absolute';
     card.style.top = `${existingCards.length * 0}px`;
     card.style.zIndex = zIndex;
+
     newposition.appendChild(card);
+    containerCount=Containercontent.childElementCount;
+    console.log("1containercount:",containerCount);
      var cardContent=card.textContent;
      // console.log(cardcontent);
 var [suit, ...valueParts] = cardContent.trim().split('');
@@ -207,8 +212,8 @@ var value = valueParts.join('');
 console.log("suit:", suit);
 console.log("value:", value);
     cardcount = cardcount+1;
-    console.log("cardcound is:",cardcount)
-    socket.emit('SelectedCards',cardcount,suit,value);
+    //console.log("cardcound is:",cardcount)
+    socket.emit('SelectedCards',cardcount,suit,value,containerCount);
 // Get the input element
   }
   }
@@ -225,12 +230,63 @@ inputElement.addEventListener('keydown', function(event) {
     socket.emit('inputData', inputValue);
   }
 });
-
+socket.on('wonmessage',()=>{
+console.log("congrats you won  🎉🎉");
+});
 //give the cards back to the user who loss the last play by the event CardsBack
-  socket.on('CardsBack',(CardStack,poppedElements)=>{
-  console.log("cards giving back to the failed user:",CardStack,poppedElements);
+  socket.on('CardsBack',(CardStack,poppedElements,SuitStack,poppedSuits)=>{
+  var suitsBack =[];
+  var cardsGivingBack = [];
+  console.log("CARDSTACK POPPEDELEMENTS",CardStack,poppedElements);
+  console.log("SUITSTACK POPPEDSUIT",SuitStack,poppedSuits);
 
- })
+  // Push values from stack1 to the combinedStack
+  while (poppedElements.length > 0) {
+    cardsGivingBack.push(poppedElements.pop());
+    suitsBack.push(poppedSuits.pop());
+  }
+
+  // Push values from stack2 to the combinedStack
+  while (CardStack.length > 0) {
+    cardsGivingBack.push(CardStack.pop());
+    suitsBack.push(SuitStack.pop());
+  }
+//console.log("cards for faileduser:",CardStack,poppedElements);
+console.log("cards for faileduser:",cardsGivingBack);
+console.log("suits for faileduser:",suitsBack);
+
+    const Container = document.getElementById('card-container');
+   // const  newposition =document.getElementById('newposition');
+  //cardContainer.innerHTML = '';
+    // Loop through each card in the subpartition array
+   cardsGivingBack.forEach((cardvalue,index) => {
+      
+      var ReturningCard = document.createElement('div');
+      ReturningCard .className = 'card';
+      ReturningCard .textContent=suitsBack[index]+cardvalue;  
+      ReturningCard.style.backgroundColor="#ff0000";
+   // console.log("cardelement is",ReturningCard );
+    //cardElement.innerText = element;
+    //openedCardsDiv.appendChild(cardElement);
+   Container.appendChild(ReturningCard );
+    ReturningCard.addEventListener('click', function() {
+        stackCards(this);
+      });
+
+  });
+
+console.log("2Number of cards in the container:", Container.childElementCount);
+containerCount=Container.childElementCount;
+ }
+)
+
+
+/*console.log("finalcount:",containerCount);
+
+ if(containerCount==0){
+  console.log("congrats you won  🎉🎉")
+  
+}*/
 
  //assign orders to each users by the event PlayOrder
 socket.on('playOrder', (index )=>{
@@ -245,7 +301,7 @@ console.log("playorder:",index);
   function opencards()
   { 
     console.log("open");
-    console.log("cardcount is:",cardcount)
+    //console.log("cardcount is:",cardcount)
     socket.emit('opencards');//user emitting an event opencards to the server ,according to this server will do further processing
   }
   //make show the opened cards to all the users by the event coming from server side which is showopencards with the set of openedcards which is poppedElements
@@ -260,8 +316,6 @@ console.log("playorder:",index);
       var cardElement = document.createElement('div');
       cardElement.className = 'card';
       cardElement.textContent=poppedSuits[index]+element;          ;
-    console.log("cardelement is",cardElement);
-    //cardElement.innerText = element;
     openedCardsDiv.appendChild(cardElement);
    //cardContainer.appendChild(cardElement);
   });
