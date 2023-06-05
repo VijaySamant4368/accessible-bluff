@@ -37,17 +37,15 @@
   <input type="text" class="CardDialogue" placeholder="bluff here" name="myInput">
       <!-- Content for the left section -->
     </div>
-    <div class="vertical-partition"></div>
-    <div class="newposition">
+    <div class="vertical-partition"> 
+    <div class="newposition"></div>
       <!-- Content for the middle section -->
     </div>
-    <div class="vertical-partition"></div>
     <div class="right-section">
       <!-- Content for the right section -->
-      <div class="OpenedCards">
-      <!-- Content for the middle section -->
+      <div class="OpenedCards"></div>
     </div>
-    </div>
+
   </div>
 </section>
 <section style="margin-top: 20px;margin-left:43.5%"> 
@@ -95,22 +93,19 @@
   margin-left: 30px;
 }  
 .CardDialogue{
-  background-color: aquamarine;
-  width: 300px;
+  width: 200px;
   margin-left: 0px;
-  height: 110px;
+  height: 50px;
 }
 .newposition{
 width: 100px; 
 position:relative;
-margin-left: 0px;
+margin-left: 35%;
   height: 110px;
   
 }
 .OpenedCards{
-  background-color: aquamarine;
   width: 500px;
-  margin-left: 50px;
   height: 110px;
 }
 .card {
@@ -165,17 +160,18 @@ margin-top:100px ;
     .left-section {
       flex: 1;
       padding: 10px;
+      width: 33%;
+      
     }
     .vertical-partition {
-      width: 1px;
+     width: 33%;
+      height: 110px;
     }
-    .middle-section {
+    
+    .right-section {
+      width: 33%;
       flex: 1;
       padding: 0px;
-    }
-    .right-section {
-      flex: 1;
-      padding: 10px;
     }
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -206,18 +202,16 @@ function stackCards(card){
     newposition.appendChild(card);
      var cardContent=card.textContent;
      // console.log(cardcontent);
- var [suit, ...valueParts] = cardContent.trim().split('');
+var [suit, ...valueParts] = cardContent.trim().split('');
 var value = valueParts.join('');
-
 console.log("suit:", suit);
 console.log("value:", value);
-     cardcount = cardcount+1;
+    cardcount = cardcount+1;
     console.log("cardcound is:",cardcount)
     socket.emit('SelectedCards',cardcount,suit,value);
 // Get the input element
   }
   }
-
     socket.on('specificMessage',()=>{
       console.log("you pressed open");
     });
@@ -233,9 +227,11 @@ inputElement.addEventListener('keydown', function(event) {
 });
 
 //give the cards back to the user who loss the last play by the event CardsBack
- socket.on('CardsBack',(CardStack,popped)=>{
-  console.log("cardstack:",CardStack,popped);
+  socket.on('CardsBack',(CardStack,poppedElements)=>{
+  console.log("cards giving back to the failed user:",CardStack,poppedElements);
+
  })
+
  //assign orders to each users by the event PlayOrder
 socket.on('playOrder', (index )=>{
 console.log("playorder:",index);
@@ -250,13 +246,30 @@ console.log("playorder:",index);
   { 
     console.log("open");
     console.log("cardcount is:",cardcount)
-
     socket.emit('opencards');//user emitting an event opencards to the server ,according to this server will do further processing
   }
   //make show the opened cards to all the users by the event coming from server side which is showopencards with the set of openedcards which is poppedElements
-  socket.on('showopencards',(poppedElements)=>{
+  socket.on('showopencards',(poppedElements,poppedSuits)=>{
     console.log("openedcards:",poppedElements);
-  })
+  // Get a reference to the OpenedCards div
+  var openedCardsDiv = document.querySelector('.OpenedCards');
+  // Clear the existing content of the OpenedCards div
+  openedCardsDiv.innerHTML = '';
+  // Create a new element for each popped element and add it to the OpenedCards div
+  poppedElements.forEach((element,index) => {
+      var cardElement = document.createElement('div');
+      cardElement.className = 'card';
+      cardElement.textContent=poppedSuits[index]+element;          ;
+    console.log("cardelement is",cardElement);
+    //cardElement.innerText = element;
+    openedCardsDiv.appendChild(cardElement);
+   //cardContainer.appendChild(cardElement);
+  });
+  setTimeout(() => {
+    openedCardsDiv.innerHTML = '';
+  }, 2000);
+
+});
 //give a shuffling effect during the time of shuffling the cards 
  function startShufflingEffect() {
   // Get the card container element

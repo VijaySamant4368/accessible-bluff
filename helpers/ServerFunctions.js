@@ -1,7 +1,3 @@
-var express =require("express");
-var app = express()
-var http =require("http").createServer(app)
-var io =require("socket.io")(http)
 
 module.exports = { 
     partitionCards:(cardset, roomCapacity) =>{
@@ -31,31 +27,5 @@ delayedCode:(cardset,roomCapacity,connectedClients) =>{
     client.emit('subpartition', subpartition);
   });
   },
- /* emitClientList:(connectedClients)=> {
-    // Create an array of client IDs
-    const clientIds = connectedClients.map(socket => socket.id);
-  
-    // Emit the updated client list to all clients
-   // io.emit('updateClientList', clientIds);
-  },
-   assignTurns:(connectedClients) =>{
-    // Emit the turn order to each client
-    connectedClients.forEach((client, index) => {
-      client.emit('playOrder', index + 1);
-    });
-  },
-  
-  changeTurn:(connectedClients) =>{
-    currentTurnIndex = (currentTurnIndex + 1) % connectedClients.length;
-    const nextPlayer = connectedClients[currentTurnIndex];
-    
-    // Emit an event to the next player indicating it's their turn
-    nextPlayer.emit('nextTurn');
-  }
-  /*executeDuringDelay:(roomId) =>{
-    console.log(roomId);
-    io.to(roomId).emit('shufflingCards', 'shuffle');
-    console.log("the cards are shuffling......")
-    // Place your additional code here
-  },*/
+ 
 }

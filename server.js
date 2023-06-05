@@ -19,10 +19,10 @@ let currentTurnIndex = 0; // Index of the current turn player
 let playinguser;
 let playinguserfail=false;
 var CardStack=[];
+var SuitStack=[];
 var InputValue;
 var cardset=CardDeck.cards
 let clientWhoOpened = null;
-
 app.get('/', (req, res) => {
   res.render('game');
 });
@@ -72,10 +72,15 @@ executeDuringDelay();
   {
   CardCount=cardcount;
   playinguserfail=false;
+  console.log("the suit is:",cardsuit)
+  console.log("the cardvalue is:",cardvalue)
+
   console.log("the cardcount is:",CardCount);
-  var Cardsuit=cardsuit;
+    SuitStack.push(cardsuit);
     CardStack.push(cardvalue);
    console.log("value:",CardStack);
+   console.log("suit:",SuitStack);
+
   });
   socket.on('inputData', (inputValue) => {
    var clientPlaying= socket.id;
@@ -100,10 +105,12 @@ console.log("input:",InputValue);
   }
 
 const poppedElements = [];
+const  poppedSuits=[];
 playinguserfail=false;
 
 for (let i = 0; i < CardCount; i++) {
   if (CardStack.length > 0) {
+    const poppedSuit = SuitStack.pop();
     const poppedElement = CardStack.pop();
     if(poppedElement!=InputValue){
       console.log("popped,input",poppedElement,InputValue);
@@ -111,25 +118,47 @@ for (let i = 0; i < CardCount; i++) {
    console.log("playinguserfail:",playinguserfail)
     }
     poppedElements.push(poppedElement);
+    poppedSuits.push(poppedSuit);
   } else {
     break; // Stack is empty, exit the loop
   }
 }
+
+/*function combineStacks(poppedElements,CardStack) {
+  const cardsGivingBack = [];
+
+  // Push values from stack1 to the combinedStack
+  while (poppedElements.length > 0) {
+    cardsGivingBack.push(poppedElements.pop());
+  }
+
+  // Push values from stack2 to the combinedStack
+  while (stack2.length > 0) {
+    cardsGivingBack.push(CardStack.pop());
+  }
+
+  return cardsGivingBack;
+}*/
+
+
 if (playinguserfail) {
   console.log("cardstackback:",CardStack);
   playinguser.emit('CardsBack',CardStack,poppedElements);
-  CardStack=[];
-
+      CardStack=[];
+      SuitStack =[];
+      
   
 } else {
   Openedclient.emit('CardsBack',CardStack,poppedElements);
+  //Openedclient.emit('CardsBack',stackedCards,stackOfSuits);
+
+  
   CardStack=[];
-
-
+  SuitStack =[];
 }
-
 console.log("popped elements:",poppedElements)
-io.emit('showopencards',poppedElements)
+console.log("popped suit:",poppedSuits)
+io.emit('showopencards',poppedElements,poppedSuits)
   });
 
     socket.on('disconnect', () => {
