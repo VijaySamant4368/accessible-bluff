@@ -10,17 +10,22 @@ app.set('view engine', 'hbs');
 app.set('views', __dirname + '/views');
 var Deck=require('./helpers/deck')
 const { Socket } = require("socket.io");
+const { TIMEOUT } = require("dns");
 var router = express.Router();
 const CardDeck =new Deck.Deck()
 CardDeck.shuffle()
 let connectedClients = [];
 let CardCount;
-let currentTurnIndex = 0; // Index of the current turn player
+let currentTurnIndex = -1; // Index of the current turn player
 let playinguser;
 let playinguserfail=false;
 var CardStack=[];
 var SuitStack=[];
 var InputValue;
+var nextPlayer;
+var openedClientIndex;
+var playingClientIndex ;
+var openActionDone=false;
 var playinguserwon=false;
 var cardset=CardDeck.cards
 //const clientValues = new Map();
@@ -55,8 +60,9 @@ io.on('connection', (socket) => {
     console.log("new user joined connected with roomID:"+roomId+ 'member'+roomCounts[roomId]) 
     // If the room reaches its capacity, emit a message to restrict further entry
 if (roomCounts[roomId] >= roomCapacity) {
-  emitClientList(connectedClients) ;
+ // emitClientList(connectedClients) ;
   assignTurns(connectedClients);
+
 // Delayed code execution after 4 seconds
 setTimeout(() => {
   serverfn.delayedCode(cardset, roomCapacity, connectedClients);
@@ -64,14 +70,25 @@ setTimeout(() => {
 console.log("roomid:"+roomId)
 // Execute something else during the 2-second delay
 executeDuringDelay();
+changeTurn();
     }
    function executeDuringDelay(){
       console.log(roomId);
       io.to(roomId).emit('shufflingCards', 'shuffle');
-      console.log("the cards are shuffling......")
+     /// console.log("the cards are shuffling......")
     }
+
+ 
+
+
+
+
+
+
+
     socket.on('SelectedCards',(cardcount,cardsuit,cardvalue,containerCount)=>
   {
+   
   CardCount=cardcount;
   playinguserfail=false;
   console.log("the suit is:",cardsuit)
@@ -88,9 +105,33 @@ executeDuringDelay();
    }
 
   });
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   socket.on('inputData', (inputValue) => {
+   openActionDone=false;
+   console.log("OPENACTIONDONE:",openActionDone)
    var clientPlaying= socket.id;
      playinguser = connectedClients.find(client => client.id === clientPlaying);
+    playingClientIndex = connectedClients.findIndex(client => client.id === playinguser);
+
     if (playinguser) {
       playinguser.emit('specificMessagetoplayinguser');
     } else {
@@ -98,12 +139,33 @@ executeDuringDelay();
     }
     InputValue= inputValue;
 console.log("input:",InputValue);
+connectedClients.forEach((client) => {
+  if (client !== nextPlayer) {
+      client.emit('openTimeStarts');
+  }
+});
+
+setTimeout(() => {
+  io.emit('openTimeEnds');
+  if(!openActionDone){
+    console.log("JUST NEXT USER");
+    changeTurn();
+    console.log("no action done");
+  }
+}, 15000);
+
+
+
+
 
   }); 
  
   socket.on('opencards',()=>{
+    openActionDone=true;
+    console.log("OPENACTIONDONE:",openActionDone)
     clientWhoOpened = socket.id;
     const Openedclient = connectedClients.find(client => client.id === clientWhoOpened);
+    openedClientIndex = connectedClients.findIndex(client => client.id === clientWhoOpened);
   if (Openedclient) {
     Openedclient.emit('specificMessage');
   } else {
@@ -119,10 +181,10 @@ for (let i = 0; i < CardCount; i++) {
     const poppedSuit = SuitStack.pop();
     const poppedElement = CardStack.pop();
     if(poppedElement!=InputValue){
-      console.log("popped element,input",poppedElement,InputValue);
+     console.log("popped element,input",poppedElement,InputValue);
      playinguserfail=true;
     
-   console.log("playinguserfail:",playinguserfail)
+     console.log("playinguserfail:",playinguserfail)
     }
     poppedElements.push(poppedElement);
     poppedSuits.push(poppedSuit);
@@ -136,19 +198,31 @@ io.emit('showopencards',poppedElements,poppedSuits)
 if (playinguserfail) {
   playinguserwon=false
   console.log("cardstackback:",CardStack);
+  //currentTurnIndex=
+  currentTurnIndex = (openedClientIndex - 1) % connectedClients.length;
+  console.log("CURRENT INDEX OF PREVIOUS ONE:(playing user fail)",currentTurnIndex);
   playinguser.emit('CardsBack',CardStack,poppedElements,SuitStack,poppedSuits);
   CardStack=[];
   SuitStack =[];
+  console.log("THIS OVER");
+  changeTurn();
+
 } else {
   if(playinguserwon){
     console.log("playinguser won");
     playinguser.emit('wonmessage');
     playinguserwon=false
   }
+  currentTurnIndex = (playingClientIndex- 1) % connectedClients.length;
+  console.log("CURRENT INDEX OF PREVIOUS ONE:(opened user fail)",currentTurnIndex);
+
   Openedclient.emit('CardsBack',CardStack,poppedElements,SuitStack,poppedSuits);
   //Openedclient.emit('CardsBack',stackedCards,stackOfSuits);
   CardStack=[];
   SuitStack =[];
+  console.log("THIS OVER");
+
+  changeTurn();
 }
   });
     socket.on('disconnect', () => {
@@ -176,7 +250,7 @@ if (playinguserfail) {
     }
     function changeTurn() {
       currentTurnIndex = (currentTurnIndex + 1) % connectedClients.length;
-      const nextPlayer = connectedClients[currentTurnIndex];
+       nextPlayer = connectedClients[currentTurnIndex];
       
       // Emit an event to the next player indicating it's their turn
       nextPlayer.emit('nextTurn');

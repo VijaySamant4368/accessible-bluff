@@ -186,11 +186,30 @@ const PlaceBtn = document.querySelector('.place');
 var PlaceClicked;
 var containerCount;
 let cardcount=0;
+var buttonSensitivity=0;
 //assign value to placeClicked once placeBtn got clicked
 PlaceBtn.addEventListener('click',()=>{
-PlaceClicked = true
+  if(buttonSensitivity==1)
+  { 
+    PlaceClicked = true;
+  }
 console.log(PlaceClicked)
 })
+
+
+  socket.on('nextTurn',()=>{
+    buttonSensitivity=1;
+    console.log("your turn comes...")
+  });
+
+   socket.on('openTimeStarts',()=>{
+    console.log("opentime starts");
+    buttonSensitivity=-1;
+   });
+
+   /*socket.on('openTimeEnds',()=>{
+    buttonSensitivity=
+   });*/
 //   Add an event listener to listen for click event , move clicked cards to the newposition and stack it over there as one by one 
 function stackCards(card){
   if(PlaceClicked){ 
@@ -225,11 +244,19 @@ console.log("value:", value);
 inputElement.addEventListener('keydown', function(event) {
   if (event.key === 'Enter') { // Check if Enter key is pressed
       cardcount=0;
-    var inputValue = event.target.value; // Get the input value
+      buttonSensitivity=0;
+      PlaceClicked=false;
+      var inputValue = event.target.value; // Get the input value
     // Emit the input value to the server
     socket.emit('inputData', inputValue);
+    
   }
 });
+
+
+
+
+
 socket.on('wonmessage',()=>{
 console.log("congrats you won  🎉🎉");
 });
@@ -237,8 +264,8 @@ console.log("congrats you won  🎉🎉");
   socket.on('CardsBack',(CardStack,poppedElements,SuitStack,poppedSuits)=>{
   var suitsBack =[];
   var cardsGivingBack = [];
-  console.log("CARDSTACK POPPEDELEMENTS",CardStack,poppedElements);
-  console.log("SUITSTACK POPPEDSUIT",SuitStack,poppedSuits);
+  //console.log("CARDSTACK POPPEDELEMENTS",CardStack,poppedElements);
+  //console.log("SUITSTACK POPPEDSUIT",SuitStack,poppedSuits);
 
   // Push values from stack1 to the combinedStack
   while (poppedElements.length > 0) {
@@ -268,7 +295,7 @@ console.log("suits for faileduser:",suitsBack);
    // console.log("cardelement is",ReturningCard );
     //cardElement.innerText = element;
     //openedCardsDiv.appendChild(cardElement);
-   Container.appendChild(ReturningCard );
+   Container.appendChild(ReturningCard);
     ReturningCard.addEventListener('click', function() {
         stackCards(this);
       });
@@ -279,14 +306,6 @@ console.log("2Number of cards in the container:", Container.childElementCount);
 containerCount=Container.childElementCount;
  }
 )
-
-
-/*console.log("finalcount:",containerCount);
-
- if(containerCount==0){
-  console.log("congrats you won  🎉🎉")
-  
-}*/
 
  //assign orders to each users by the event PlayOrder
 socket.on('playOrder', (index )=>{
@@ -301,8 +320,12 @@ console.log("playorder:",index);
   function opencards()
   { 
     console.log("open");
-    //console.log("cardcount is:",cardcount)
+    console.log("button sensitivity is:",buttonSensitivity);
+    if(buttonSensitivity==-1)
+    { 
     socket.emit('opencards');//user emitting an event opencards to the server ,according to this server will do further processing
+    buttonSensitivity=0;
+    }
   }
   //make show the opened cards to all the users by the event coming from server side which is showopencards with the set of openedcards which is poppedElements
   socket.on('showopencards',(poppedElements,poppedSuits)=>{
@@ -361,9 +384,9 @@ console.log(data)
       newCard.className = 'card';
       newCard.textContent=card.suit+card.value;
       newCard.addEventListener('click', function() {
-        stackCards(this);
+      stackCards(this);
       });
-      // Append the card to the card container
+      // Append the card to the card container;
       cardContainer.appendChild(newCard);
     });
   });
