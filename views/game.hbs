@@ -35,6 +35,7 @@
   <div class="container">
     <div class="left-section">
   <input type="text" class="CardDialogue" placeholder="bluff here" name="myInput">
+  <div class="round-div"></div>
       <!-- Content for the left section -->
     </div>
     <div class="vertical-partition"> 
@@ -153,6 +154,26 @@ margin-top: 0px;
   margin-top: 10px;
   text-align: center;
 }
+.round-div {
+      margin-top: 10px;
+      margin-left: 40px;
+      width: 100px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: #f0f0f0;
+
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 15px;
+      font-weight: bold;
+      color: black;
+
+
+
+
+    }
 .container {
       display: flex;
 margin-top:100px ;
@@ -195,8 +216,6 @@ PlaceBtn.addEventListener('click',()=>{
   }
 console.log(PlaceClicked)
 })
-
-
   socket.on('nextTurn',()=>{
     buttonSensitivity=1;
     console.log("your turn comes...")
@@ -205,7 +224,15 @@ console.log(PlaceClicked)
    socket.on('openTimeStarts',()=>{
     console.log("opentime starts");
     buttonSensitivity=-1;
+
+
+    setTimeout(() => {
+  socket.emit('openTimeOver');
+}, 15000);
    });
+
+
+
 
    /*socket.on('openTimeEnds',()=>{
     buttonSensitivity=
@@ -248,10 +275,20 @@ inputElement.addEventListener('keydown', function(event) {
       PlaceClicked=false;
       var inputValue = event.target.value; // Get the input value
     // Emit the input value to the server
+    contentDiv.innerHTML = '';
     socket.emit('inputData', inputValue);
+   // console.log("CARDCOUNT:",cardcount)
     
   }
 });
+ const contentDiv = document.getElementsByClassName('round-div')[0];
+
+    socket.on('showinput', (CardCount, InputValue) => {
+      // Update the content of the div
+      console.log("input is:",CardCount,InputValue)
+      contentDiv.innerText = `${CardCount} ${InputValue}`;
+    });
+
 
 
 
