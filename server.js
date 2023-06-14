@@ -111,7 +111,7 @@ io.on('connection', (socket) => {
     InputValue = inputValue;
     console.log("input:", InputValue);
     //io.emit('showinput',CardCount,InputValue);
-    socket.to(roomId).emit('showinput', CardCount, InputValue)
+    socket.to(roomId).emit('showinput', CardCount,InputValue)
     rooms[roomId].clients.forEach((client) => {
       if (client !== rooms[roomId].nextPlayer) {
         client.emit('openTimeStarts');
