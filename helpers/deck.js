@@ -2,8 +2,8 @@ const SUITS = ["♠", "♣", "♥", "♦"]
 const VALUES = [
   "A",
   "2",
- "3",
- "4",
+  "3",
+  "4",
   "5",
   "6",
   "7",
@@ -14,7 +14,7 @@ const VALUES = [
   "Q",
   "K"
 ]
- class Deck {
+class Deck {
   constructor(cards = freshDeck()) {
     this.cards = cards
   }
@@ -44,5 +44,5 @@ function freshDeck() {
   })
 }
 //module.exports=Deck;
-exports.Card =Card;
-exports.Deck=Deck;
+exports.Card = Card;
+exports.Deck = Deck;
