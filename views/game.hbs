@@ -254,9 +254,6 @@
     }
     console.log(PlaceClicked)
   })
-
-
-
   socket.on('STOC-SET-WHOS-TURN', (nextPlayerPosition) => {
     const next = nextPlayerPosition;
     buttonSensitivity = 1;
@@ -297,12 +294,10 @@
       console.log("suit:", suit);
       console.log("value:", value);
       cardcount = cardcount + 1;
-      //console.log("cardcound is:",cardcount)
       socket.emit('SelectedCards', cardcount, suit, value, containerCount);
       // Get the input element
     }
   }
-  
   var inputElement = document.querySelector('.CardDialogue');
   // Add an event listener to listen for keydown events
   inputElement.addEventListener('keydown', function (event) {
@@ -362,9 +357,7 @@
     console.log("playorder:", index);
   });
   //make visible a message to the user who send the input that time
-  socket.on('specificMessagetoplayinguser', () =>
-    console.log("you send an input")
-  );
+ 
   //opencardsfunction uses to inform the client that the user pressed open
   function opencards() {
     console.log("open");

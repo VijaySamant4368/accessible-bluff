@@ -99,7 +99,7 @@ io.on('connection', (socket) => {
     rooms[roomId].playingClientIndex = rooms[roomId].clients.findIndex(client => client.id === rooms[roomId].playinguser);
 
     if (rooms[roomId].playinguser) {
-      rooms[roomId].playinguser.emit('specificMessagetoplayinguser');
+      
     } else {
       console.log('Client not found or not connected');
     }
