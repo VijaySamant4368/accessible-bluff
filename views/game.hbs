@@ -1,430 +1,443 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BLUFF</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-  </head>
-  <body>
-    <div class="row"> 
-  <section style="margin-top:0px;">
-    <div class="col-md-12"> 
-    <div class="profile" style="width: 18rem;height:2rem; margin-top:0%">
-  <img class=" img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtYqXjw6IR_opev4UADLjT8TPcLmWYQsx_YQ&usqp=CAU " class="card-img-top" alt="...">
-  <div class="card-body">
-    <h5 class="card-title">aswathy</h5>
-  </div>
-    </div>
-    </div>
-<div class="card-container">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BLUFF</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+</head>
+
+<body>
   <div class="row">
-    <div class="col-md-12" id="card-container">
-    </div>
-  </div>
-</div>
-  </section>
-  <section> 
-<div class="button"> 
-<button class="place" >place</button>
-<button class="open" onclick=" opencards()">open</button>
-<button class="pass">pass</button>
-</div>
-  </section>
-<section >
-  <div class="container">
-    <div class="left-section">
-  <input type="text" class="CardDialogue" placeholder="bluff here" name="myInput">
-  <div class="round-div"></div>
-      <!-- Content for the left section -->
-    </div>
-    <div class="vertical-partition"> 
-    <div class="newposition"></div>
-      <!-- Content for the middle section -->
-    </div>
-    <div class="right-section">
-      <!-- Content for the right section -->
-      <div class="OpenedCards"></div>
-    </div>
+    <section style="margin-top:0px;">
+      <div class="col-md-12">
+        <div class="profile" style="width: 18rem;height:2rem; margin-top:0%">
+          <img class=" img"
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtYqXjw6IR_opev4UADLjT8TPcLmWYQsx_YQ&usqp=CAU "
+            class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">aswathy</h5>
+          </div>
+        </div>
+      </div>
+      <div class="card-container">
+        <div class="row">
+          <div class="col-md-12" id="card-container">
+          </div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="button">
+        <button class="place">place</button>
+        <button class="open" onclick=" opencards()">open</button>
+        <button class="pass">pass</button>
+      </div>
+    </section>
+    <section>
+      <div class="container">
+        <div class="left-section">
+          <input type="text" class="CardDialogue" placeholder="bluff here" name="myInput">
+          <div class="round-div"></div>
+          <!-- Content for the left section -->
+        </div>
+        <div class="vertical-partition">
+          <div class="newposition"></div>
+          <!-- Content for the middle section -->
+        </div>
+        <div class="right-section">
+          <!-- Content for the right section -->
+          <div class="OpenedCards"></div>
+        </div>
 
+      </div>
+    </section>
+    <section style="margin-top: 20px;margin-left:43.5%">
+      <div class="oppprofile" style="width: 18rem;height:2rem;">
+        <img class=" img"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtYqXjw6IR_opev4UADLjT8TPcLmWYQsx_YQ&usqp=CAU "
+          class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">opponent</h5>
+        </div>
+      </div>
+    </section>
   </div>
-</section>
-<section style="margin-top: 20px;margin-left:43.5%"> 
-    <div class="oppprofile" style="width: 18rem;height:2rem;">
-  <img class=" img" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtYqXjw6IR_opev4UADLjT8TPcLmWYQsx_YQ&usqp=CAU " class="card-img-top" alt="...">
-  <div class="card-body">
-    <h5 class="card-title">opponent</h5>
-  </div>
-</div>
-</section>
-</div>
-    <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js" integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js" integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-  </body>
+  <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"
+    integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+    integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>
-<style> 
-  body{
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      
-    }
+<style>
+  body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+  }
+
   .img {
-     height: 80px;
-    width: 100px ;
+    height: 80px;
+    width: 100px;
   }
-  .profile{
-  position:absolute;
-  height: 160px;
-  margin-left: 45%;
-  margin-right: 45%;
-  margin-top: 0%;
+
+  .profile {
+    position: absolute;
+    height: 160px;
+    margin-left: 45%;
+    margin-right: 45%;
+    margin-top: 0%;
   }
-.card-container 
-{
-  width: 95%;
-  height: 120px;
-  overflow-x: scroll;
-  white-space: nowrap;
-  margin-top: 108px;
-   position: relative;
-  margin-left: 30px;
-}  
-.CardDialogue{
-  width: 200px;
-  margin-left: 0px;
-  height: 50px;
-}
-.newposition{
-width: 100px; 
-position:relative;
-margin-left: 35%;
-  height: 110px;
-  
-}
-.OpenedCards{
-  width: 500px;
-  height: 110px;
-}
-.card {
-  font-size:medium;
-  display: inline-block;
-  width: 80px;
-  height: 100px;
-  margin-right: 20px;
-  background-color: #ccc;
-  border-radius: 10px;
-}
-.button{
-  position:absolute;
-  margin-top:0px;
-  margin-left: 40%;
-  margin-right: 40%;
-  height: 110px;
-  width: 500px;
-}
-.oppprofile{
-margin-top: 0px;
-}
-.place,.open,.pass{
-  
-  margin-top: 20px;
-  width: 70px;
-  height: 50px;
-  border-radius: 20px;
-}
-.loading-animation {
-  /* Add your loading animation styles here */
-  /* For example, you can use a CSS spinner animation */
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 2s linear infinite;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-.text-element {
-  margin-top: 10px;
-  text-align: center;
-}
-.round-div {
-      margin-top: 10px;
-      margin-left: 40px;
-      width: 100px;
-      height: 90px;
-      border-radius: 50%;
-      background-color: #f0f0f0;
 
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 15px;
-      font-weight: bold;
-      color: black;
-
-
-
-
-    }
-.container {
-      display: flex;
-margin-top:100px ;
-    }
-    .left-section {
-      flex: 1;
-      padding: 10px;
-      width: 33%;
-      
-    }
-    .vertical-partition {
-     width: 33%;
-      height: 110px;
-    }
-    
-    .right-section {
-      width: 33%;
-      flex: 1;
-      padding: 0px;
-    }
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
- </style>
- <script src="/socket.io/socket.io.js"></script>
-  
- <script> 
-  var socket =io();
-const PlaceBtn = document.querySelector('.place');
-var PlaceClicked;
-var containerCount;
-let cardcount=0;
-var buttonSensitivity=0;
-//assign value to placeClicked once placeBtn got clicked
-PlaceBtn.addEventListener('click',()=>{
-  if(buttonSensitivity==1)
-  { 
-    PlaceClicked = true;
+  .card-container {
+    width: 95%;
+    height: 120px;
+    overflow-x: scroll;
+    white-space: nowrap;
+    margin-top: 108px;
+    position: relative;
+    margin-left: 30px;
   }
-console.log(PlaceClicked)
-})
-  socket.on('nextTurn',()=>{
-    buttonSensitivity=1;
-    console.log("your turn comes...")
+
+  .CardDialogue {
+    width: 200px;
+    margin-left: 0px;
+    height: 50px;
+  }
+
+  .newposition {
+    width: 100px;
+    position: relative;
+    margin-left: 35%;
+    height: 110px;
+
+  }
+
+  .OpenedCards {
+    width: 500px;
+    height: 110px;
+  }
+
+  .card {
+    font-size: medium;
+    display: inline-block;
+    width: 80px;
+    height: 100px;
+    margin-right: 20px;
+    background-color: #ccc;
+    border-radius: 10px;
+  }
+
+  .button {
+    position: absolute;
+    margin-top: 0px;
+    margin-left: 40%;
+    margin-right: 40%;
+    height: 110px;
+    width: 500px;
+  }
+
+  .oppprofile {
+    margin-top: 0px;
+  }
+
+  .place,
+  .open,
+  .pass {
+
+    margin-top: 20px;
+    width: 70px;
+    height: 50px;
+    border-radius: 20px;
+  }
+
+  .loading-animation {
+    /* Add your loading animation styles here */
+    /* For example, you can use a CSS spinner animation */
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .text-element {
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .round-div {
+    margin-top: 10px;
+    margin-left: 40px;
+    width: 100px;
+    height: 90px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: black;
+
+
+
+
+  }
+
+  .container {
+    display: flex;
+    margin-top: 100px;
+  }
+
+  .left-section {
+    flex: 1;
+    padding: 10px;
+    width: 33%;
+
+  }
+
+  .vertical-partition {
+    width: 33%;
+    height: 110px;
+  }
+
+  .right-section {
+    width: 33%;
+    flex: 1;
+    padding: 0px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+  var socket = io();
+  const PlaceBtn = document.querySelector('.place');
+  var PlaceClicked;
+  var containerCount;
+  let cardcount = 0;
+  var Index;
+  var buttonSensitivity = 0;
+  //var nextPlayerPosition=0;
+  //assign value to placeClicked once placeBtn got clicked
+  PlaceBtn.addEventListener('click', () => {
+    if (buttonSensitivity == 1) {
+      PlaceClicked = true;
+    }
+    console.log(PlaceClicked)
+  })
+
+
+
+  socket.on('STOC-SET-WHOS-TURN', (nextPlayerPosition) => {
+    const next = nextPlayerPosition;
+    buttonSensitivity = 1;
+
+    console.log("next player is:player", next);
+    if (next == Index) {
+      console.log("your turn comes");
+    }
+
   });
-
-   socket.on('openTimeStarts',()=>{
+  socket.on('STOC-RAISE-TIME-START', () => {
     console.log("opentime starts");
-    buttonSensitivity=-1;
-
-
-    setTimeout(() => {
-  socket.emit('openTimeOver');
-}, 15000);
-   });
-
-
-
-
-   /*socket.on('openTimeEnds',()=>{
-    buttonSensitivity=
-   });*/
-//   Add an event listener to listen for click event , move clicked cards to the newposition and stack it over there as one by one 
-function stackCards(card){
-  if(PlaceClicked){ 
-    const Containercontent = document.getElementById('card-container');
-    const newposition = document.querySelector('.newposition');
-    const existingCards = newposition.getElementsByClassName('card');
-    const zIndex = existingCards.length + 1;
-    card.style.position = 'absolute';
-    card.style.top = `${existingCards.length * 0}px`;
-    card.style.zIndex = zIndex;
-
-    newposition.appendChild(card);
-    containerCount=Containercontent.childElementCount;
-    console.log("1containercount:",containerCount);
-     var cardContent=card.textContent;
-     // console.log(cardcontent);
-var [suit, ...valueParts] = cardContent.trim().split('');
-var value = valueParts.join('');
-console.log("suit:", suit);
-console.log("value:", value);
-    cardcount = cardcount+1;
-    //console.log("cardcound is:",cardcount)
-    socket.emit('SelectedCards',cardcount,suit,value,containerCount);
-// Get the input element
+    buttonSensitivity = -1;
+  });
+  socket.on('STOC-RAISE-TIME-OVER', () => {
+    console.log("raise time over")
+  });
+  /*socket.on('openTimeEnds',()=>{
+   buttonSensitivity=
+  });*/
+  //   Add an event listener to listen for click event , move clicked cards to the newposition and stack it over there as one by one 
+  function stackCards(card) {
+    if (PlaceClicked) {
+      const Containercontent = document.getElementById('card-container');
+      const newposition = document.querySelector('.newposition');
+      const existingCards = newposition.getElementsByClassName('card');
+      const zIndex = existingCards.length + 1;
+      card.style.position = 'absolute';
+      card.style.top = `${existingCards.length * 0}px`;
+      card.style.zIndex = zIndex;
+      newposition.appendChild(card);
+      containerCount = Containercontent.childElementCount;
+      console.log("1containercount:", containerCount);
+      var cardContent = card.textContent;
+      // console.log(cardcontent);
+      var [suit, ...valueParts] = cardContent.trim().split('');
+      var value = valueParts.join('');
+      console.log("suit:", suit);
+      console.log("value:", value);
+      cardcount = cardcount + 1;
+      //console.log("cardcound is:",cardcount)
+      socket.emit('SelectedCards', cardcount, suit, value, containerCount);
+      // Get the input element
+    }
   }
-  }
-    socket.on('specificMessage',()=>{
-      console.log("you pressed open");
-    });
+  
   var inputElement = document.querySelector('.CardDialogue');
-// Add an event listener to listen for keydown events
-inputElement.addEventListener('keydown', function(event) {
-  if (event.key === 'Enter') { // Check if Enter key is pressed
-      cardcount=0;
-      buttonSensitivity=0;
-      PlaceClicked=false;
+  // Add an event listener to listen for keydown events
+  inputElement.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') { // Check if Enter key is pressed
+      cardcount = 0;
+      buttonSensitivity = 0;
+      PlaceClicked = false;
       var inputValue = event.target.value; // Get the input value
-    // Emit the input value to the server
-    contentDiv.innerHTML = '';
-    socket.emit('inputData', inputValue);
-   // console.log("CARDCOUNT:",cardcount)
-    
-  }
-});
- const contentDiv = document.getElementsByClassName('round-div')[0];
-
-    socket.on('showinput', (CardCount, InputValue) => {
-      // Update the content of the div
-      console.log("input is:",CardCount,InputValue)
-      contentDiv.innerText = `${CardCount} ${InputValue}`;
-    });
-socket.on('wonmessage',()=>{
-console.log("congrats you won  🎉🎉");
-});
-//give the cards back to the user who loss the last play by the event CardsBack
-  socket.on('CardsBack',(CardStack,poppedElements,SuitStack,poppedSuits)=>{
-  var suitsBack =[];
-  var cardsGivingBack = [];
-  //console.log("CARDSTACK POPPEDELEMENTS",CardStack,poppedElements);
-  //console.log("SUITSTACK POPPEDSUIT",SuitStack,poppedSuits);
-
-  // Push values from stack1 to the combinedStack
-  while (poppedElements.length > 0) {
-    cardsGivingBack.push(poppedElements.pop());
-    suitsBack.push(poppedSuits.pop());
-  }
-
-  // Push values from stack2 to the combinedStack
-  while (CardStack.length > 0) {
-    cardsGivingBack.push(CardStack.pop());
-    suitsBack.push(SuitStack.pop());
-  }
-//console.log("cards for faileduser:",CardStack,poppedElements);
-console.log("cards for faileduser:",cardsGivingBack);
-console.log("suits for faileduser:",suitsBack);
-
+      // Emit the input value to the server
+      contentDiv.innerHTML = '';
+      socket.emit('CTOS-PLACE-CARD', inputValue);
+    }
+  });
+  const contentDiv = document.getElementsByClassName('round-div')[0];
+  socket.on('STOC-GAME-PLAYED', (CardCount, InputValue) => {
+    // Update the content of the div
+    console.log("input is:", CardCount, InputValue)
+    contentDiv.innerText = `${CardCount} ${InputValue}`;
+  });
+  socket.on('STOC-PLAYER-WON', () => {
+    console.log("congrats you won  🎉🎉");
+  });
+  //give the cards back to the user who loss the last play by the event CardsBack
+  socket.on('STOC1C-DUMP-PENALTY-CARDS', (CardStack, poppedElements, SuitStack, poppedSuits) => {
+    var suitsBack = [];
+    var cardsGivingBack = [];
+    while (poppedElements.length > 0) {
+      cardsGivingBack.push(poppedElements.pop());
+      suitsBack.push(poppedSuits.pop());
+    }
+    // Push values from stack2 to the combinedStack
+    while (CardStack.length > 0) {
+      cardsGivingBack.push(CardStack.pop());
+      suitsBack.push(SuitStack.pop());
+    }
+    //console.log("cards for faileduser:",CardStack,poppedElements);
+    console.log("cards for faileduser:", cardsGivingBack);
+    console.log("suits for faileduser:", suitsBack);
     const Container = document.getElementById('card-container');
-   // const  newposition =document.getElementById('newposition');
-  //cardContainer.innerHTML = '';
-    // Loop through each card in the subpartition array
-   cardsGivingBack.forEach((cardvalue,index) => {
-      
+    cardsGivingBack.forEach((cardvalue, index) => {
       var ReturningCard = document.createElement('div');
-      ReturningCard .className = 'card';
-      ReturningCard .textContent=suitsBack[index]+cardvalue;  
-      ReturningCard.style.backgroundColor="#ff0000";
-   // console.log("cardelement is",ReturningCard );
-    //cardElement.innerText = element;
-    //openedCardsDiv.appendChild(cardElement);
-   Container.appendChild(ReturningCard);
-    ReturningCard.addEventListener('click', function() {
+      ReturningCard.className = 'card';
+      ReturningCard.textContent = suitsBack[index] + cardvalue;
+      ReturningCard.style.backgroundColor = "#ff0000";
+      Container.appendChild(ReturningCard);
+      ReturningCard.addEventListener('click', function () {
         stackCards(this);
       });
-
+    });
+    console.log("2Number of cards in the container:", Container.childElementCount);
+    containerCount = Container.childElementCount;
+  }
+  )
+  //assign orders to each users by the event PlayOrder
+  socket.on('STO1C-SET-POSITION', (index) => {
+    Index = index;
+    console.log("playorder:", index);
   });
-
-console.log("2Number of cards in the container:", Container.childElementCount);
-containerCount=Container.childElementCount;
- }
-)
-
- //assign orders to each users by the event PlayOrder
-socket.on('playOrder', (index )=>{
-console.log("playorder:",index);
-});
-
- //make visible a message to the user who send the input that time
-      socket.on('specificMessagetoplayinguser',()=>
-      console.log("you send an input")
-      );
-//opencardsfunction uses to inform the client that the user pressed open
-  function opencards()
-  { 
+  //make visible a message to the user who send the input that time
+  socket.on('specificMessagetoplayinguser', () =>
+    console.log("you send an input")
+  );
+  //opencardsfunction uses to inform the client that the user pressed open
+  function opencards() {
     console.log("open");
-    console.log("button sensitivity is:",buttonSensitivity);
-    if(buttonSensitivity==-1)
-    { 
-    socket.emit('opencards');//user emitting an event opencards to the server ,according to this server will do further processing
-    buttonSensitivity=0;
+    console.log("button sensitivity is:", buttonSensitivity);
+    if (buttonSensitivity == -1) {
+      socket.emit('CTOS-RAISE');//user emitting an event opencards to the server ,according to this server will do further processing
+      buttonSensitivity = 0;
     }
   }
   //make show the opened cards to all the users by the event coming from server side which is showopencards with the set of openedcards which is poppedElements
-  socket.on('showopencards',(poppedElements,poppedSuits)=>{
-    console.log("openedcards:",poppedElements);
-  // Get a reference to the OpenedCards div
-  var openedCardsDiv = document.querySelector('.OpenedCards');
-  // Clear the existing content of the OpenedCards div
-  openedCardsDiv.innerHTML = '';
-  // Create a new element for each popped element and add it to the OpenedCards div
-  poppedElements.forEach((element,index) => {
+  socket.on('STOC-SHOW-RAISED-CARDS', (poppedElements, poppedSuits) => {
+    console.log("openedcards:", poppedElements);
+    // Get a reference to the OpenedCards div
+    var openedCardsDiv = document.querySelector('.OpenedCards');
+    // Clear the existing content of the OpenedCards div
+    openedCardsDiv.innerHTML = '';
+    // Create a new element for each popped element and add it to the OpenedCards div
+    poppedElements.forEach((element, index) => {
       var cardElement = document.createElement('div');
       cardElement.className = 'card';
-      cardElement.textContent=poppedSuits[index]+element;          ;
-    openedCardsDiv.appendChild(cardElement);
-   //cardContainer.appendChild(cardElement);
+      cardElement.textContent = poppedSuits[index] + element;;
+      openedCardsDiv.appendChild(cardElement);
+      //cardContainer.appendChild(cardElement);
+    });
+    setTimeout(() => {
+      openedCardsDiv.innerHTML = '';
+    }, 2000);
   });
-  setTimeout(() => {
-    openedCardsDiv.innerHTML = '';
-  }, 2000);
-
-});
-//give a shuffling effect during the time of shuffling the cards 
- function startShufflingEffect() {
-  // Get the card container element
+  //give a shuffling effect during the time of shuffling the cards 
+  function startShufflingEffect() {
+    // Get the card container element
     const cardContainer = document.getElementById('card-container');
-  // Create loading animation and text elements
-  const loadingAnimation = document.createElement('div');
-  loadingAnimation.classList.add('loading-animation');
-  const textElement = document.createElement('div');
-  textElement.classList.add('text-element');
-  textElement.textContent = 'Card is shuffling';
-  // Append loading animation and text elements to the card container
- cardContainer.innerHTML = '';
-  cardContainer.appendChild(loadingAnimation);
-  cardContainer.appendChild(textElement);
-  // Remove loading animation and text elements after 4 seconds
-  setTimeout(() => {
+    // Create loading animation and text elements
+    const loadingAnimation = document.createElement('div');
+    loadingAnimation.classList.add('loading-animation');
+    const textElement = document.createElement('div');
+    textElement.classList.add('text-element');
+    textElement.textContent = 'Card is shuffling';
+    // Append loading animation and text elements to the card container
     cardContainer.innerHTML = '';
-  }, 3000);
-}
-//make the user to know shuffling is happening 
-socket.on('shufflingCards',(data)=>
-{
-console.log(data)
-  startShufflingEffect();
-});
-  socket.on('subpartition',(subpartition)=>{
-    console.log("received subpartition:",subpartition);
+    cardContainer.appendChild(loadingAnimation);
+    cardContainer.appendChild(textElement);
+    // Remove loading animation and text elements after 4 seconds
+    setTimeout(() => {
+      cardContainer.innerHTML = '';
+    }, 3000);
+  }
+  //make the user to know shuffling is happening 
+  socket.on('STOC-SHUFFLING', (data) => {
+    console.log(data)
+    startShufflingEffect();
+  });
+  socket.on('STO1C-DRAW-CARDS', (subpartition) => {
+    console.log("received subpartition:", subpartition);
     const cardContainer = document.getElementById('card-container');
-    const  newposition =document.getElementById('newposition');
-  cardContainer.innerHTML = '';
+    const newposition = document.getElementById('newposition');
+    cardContainer.innerHTML = '';
     // Loop through each card in the subpartition array
     subpartition.forEach((card) => {
       // Create a new card element
       const newCard = document.createElement('div');
       newCard.className = 'card';
-      newCard.textContent=card.suit+card.value;
-      newCard.addEventListener('click', function() {
-      stackCards(this);
+      newCard.textContent = card.suit + card.value;
+      newCard.addEventListener('click', function () {
+        stackCards(this);
       });
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
     });
   });
-// Handle disconnection from the server
-socket.on('disconnect', () => {
-  // Handle the disconnection
-  console.log('Disconnected from the server.');
-});
- </script>
- 
+  // Handle disconnection from the server
+  socket.on('disconnect', () => {
+    // Handle the disconnection
+    console.log('Disconnected from the server.');
+  });
+</script>

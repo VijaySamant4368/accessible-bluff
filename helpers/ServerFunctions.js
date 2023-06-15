@@ -21,7 +21,7 @@ module.exports = {
       const subpartition = partitionedCards[index]; // Get the corresponding subpartition
       console.log(subpartition);
       // Emit the subpartition to the client
-      client.emit('subpartition', subpartition);
+      client.emit('STO1C-DRAW-CARDS', subpartition);
     });
   },
 
