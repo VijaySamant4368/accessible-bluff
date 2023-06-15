@@ -70,9 +70,10 @@ io.on('connection', (socket) => {
     executeDuringDelay(roomId);
     changeTurn(roomId, io);
   }
-  function executeDuringDelay() {
+  function executeDuringDelay(roomId) {
     console.log(roomId);
-    socket.to(roomId).emit('STOC-SHUFFLING', 'shuffle');
+    //io.socket.emit('STOC-SHUFFLING', 'shuffle');
+    io.to(roomId).emit( 'STOC-SHUFFLING', 'shuffle')
   }
   socket.on('SelectedCards', (cardcount, cardsuit, cardvalue, containerCount) => {
     CardCount = cardcount;
@@ -105,21 +106,19 @@ io.on('connection', (socket) => {
     }
     InputValue = inputValue;
     console.log("input:", InputValue);
-    //io.emit('showinput',CardCount,InputValue);
     socket.to(roomId).emit('STOC-GAME-PLAYED', CardCount, InputValue)
-    //showpalayedcards stoc ;
-    rooms[roomId].clients.forEach((client) => {
+   /* rooms[roomId].clients.forEach((client) => {
       if (client !== rooms[roomId].nextPlayer) {
         client.emit('STOC-RAISE-TIME-START');
       }
-    });
+    });*/
+    io.to(roomId).emit('STOC-RAISE-TIME-START');
     setTimeout(() => {
-      socket.emit('STOC-RAISE-TIME-OVER', () => {
-        if (rooms[roomId].openActionDone) {
+      io.to(roomId).emit('STOC-RAISE-TIME-OVER',);
+       /* if (rooms[roomId].openActionDone) {
           changeTurn(roomId);
-        }
-      });
-    }, 15000);
+        }*/
+    },5000);
   });
   socket.on('CTOS-RAISE', () => {
     rooms[roomId].openActionDonetrue;
