@@ -1,0 +1,77 @@
+
+  .playersContainer {
+    display: flex;
+    justify-content: center;
+    gap: 9px;
+  }
+
+  .cards {
+    height: 120px;
+    border-radius: 8px;
+    /*border: solid;*/
+    /*border-width: 1px;*/
+    background-color: #cccccc;
+  }
+
+  .cardsContainer {
+    display: flex;
+    gap: 5px;
+    margin-top: 15px;
+    overflow-x: scroll;
+    /* justify-content: center;*/
+  }
+
+  .playGround {
+    display: flex;
+    /*height: 100%;*/
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .selectionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .user {
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    align-items: center;
+    border: solid;
+    border-width: 1px;
+  }
+
+  /*.friendsContainer {
+    display: flex;
+    gap: 5px;
+  }*/
+
+
+  .loading-animation {
+    /* Add your loading animation styles here */
+    /* For example, you can use a CSS spinner animation */
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .text-element {
+    margin-top: 10px;
+    text-align: center;
+
+  }

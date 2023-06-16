@@ -3,11 +3,13 @@ var app = express()
 var http = require("http").createServer(app)
 var io = require("socket.io")(http)
 var serverfn = require('./helpers/ServerFunctions')
+var path = require('path');
 const hbs = require('hbs');
 // Set up the view engine to use HBS
 app.set('view engine', 'hbs');
 // Set the location of the views directory
 app.set('views', __dirname + '/views');
+app.use(express.static(path.join(__dirname, 'public')));
 var Deck = require('./helpers/deck');
 const { Socket } = require("socket.io");
 const { TIMEOUT } = require("dns");
