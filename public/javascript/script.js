@@ -6,6 +6,29 @@
 
   var socket = io();
 
+  
+
+const passButton = document.getElementById('pass-btn');
+
+document.addEventListener('keydown', (event) => {
+  // Check if the pressed key is either "P" or "p" (case-insensitive)
+  if (event.key.toLowerCase() === 'p') {
+    passButton.click(); // Trigger pass button click event
+  }
+});
+
+const raiseButton = document.getElementById('raise-btn');
+
+document.addEventListener('keydown', (event) => {
+  // Check if the pressed key is either "R" or "r" (case-insensitive)
+  if (event.key.toLowerCase() === 'r') {
+    raiseButton.click(); // Trigger raise button click event
+  }
+});
+
+
+
+
   socket.on('STOC-SET-NUMBER-OF-PLAYERS', (total) => {
     const playerContainer = document.getElementById('player-container')
     for (i = 1; i <= total; i++) {
@@ -263,8 +286,12 @@
       newCard.setAttribute('tabindex', '0');
       newCard.textContent = suitsBack[index] + cardvalue;
       newCard.style.backgroundColor = "#ff0000";
+      const cardObject = {
+        suit: suitsBack[index],
+        value: cardvalue
+      };
       newCard.addEventListener('click', () => {
-        toSelected(newCard.textContent, newCard, cardContainer);
+        toSelected(cardObject, newCard, cardContainer);
       }, { once: true });
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
