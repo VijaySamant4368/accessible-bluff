@@ -6,9 +6,7 @@
 
   var socket = io();
 
-  
-
-const passButton = document.getElementById('pass-btn');
+  const passButton = document.getElementById('pass-btn');
 
 document.addEventListener('keydown', (event) => {
   // Check if the pressed key is either "P" or "p" (case-insensitive)
@@ -25,9 +23,6 @@ document.addEventListener('keydown', (event) => {
     raiseButton.click(); // Trigger raise button click event
   }
 });
-
-
-
 
   socket.on('STOC-SET-NUMBER-OF-PLAYERS', (total) => {
     const playerContainer = document.getElementById('player-container')
