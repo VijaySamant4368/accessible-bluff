@@ -1,4 +1,4 @@
-
+//hi
 
   var pos;
   var next;
@@ -296,6 +296,19 @@ document.addEventListener('keydown', (event) => {
 
     sort_cards('card-container');
   })
+
+  function passaction(){
+    socket.emit('CTOS-PASS',pos);
+  }
+
+  socket.on('STOC-PLAY-OVER',()=>{
+    console.log("this play over .");
+    const playedContainer = document.getElementById('container_played');
+    playedContainer.innerHTML = "";
+
+  }
+
+  );
 
   socket.on('STOC-PLAYER-WON', () => {
     console.log("congrats you won  🎉🎉");
