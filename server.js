@@ -43,6 +43,7 @@ io.on('connection', (socket) => {
       CardStack: [], // Card stack specific to the room
       SuitStack: [], // Suit stack specific to the room
       passedPlayers: [],
+      playerGoingToWin: -1,
       wonUsers:[],
       // Add other room-specific variables as needed
       lastPlayedCardCount: undefined,
@@ -54,7 +55,6 @@ io.on('connection', (socket) => {
       openedClientIndex: undefined,
       playingClientIndex: undefined,
       raiseActionDone: false,
-      playinguserwon: false,
       cardset: CardDeck.cards,
       clientWhoOpened: undefined
     };
@@ -92,8 +92,9 @@ io.on('connection', (socket) => {
     console.log("suit:", rooms[roomId].SuitStack);
 
     if (remainingCards == 0) {
-      console.log("playinguser won")
-      rooms[roomId].playinguserwon = true;
+      const player = (rooms[roomId].currentTurnIndex + 1) % rooms[roomId].clients.length;
+      console.log("Last playerd user won! position : ", player );
+      rooms[roomId].playerGoingToWin = player;
     }
 
     rooms[roomId].raiseActionDone = false;
@@ -106,21 +107,20 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('STOC-GAME-PLAYED', lastPlayedCardCount, rooms[roomId].bluff_text)
     io.to(roomId).emit('STOC-RAISE-TIME-START');
     setTimeout(() => {
-      
-      if (!rooms[roomId].raiseActionDone) {
         io.to(roomId).emit('STOC-RAISE-TIME-OVER',);
-        if(rooms[roomId].playinguserwon ){
-          rooms[roomId].wonUsers.push(rooms[roomId].nextPlayer.position)
-          io.to(roomId).emit('STOC-PLAYER-WON', rooms[roomId].nextPlayer.position);
-          rooms[roomId].playinguserwon=false;
+        if(rooms[roomId].playerGoingToWin != -1 ){
+          rooms[roomId].wonUsers.push(rooms[roomId].playerGoingToWin)
+          io.to(roomId).emit('STOC-PLAYER-WON', rooms[roomId].playerGoingToWin);
+          rooms[roomId].playerGoingToWin=-1;
         }
         changeTurn(roomId, io);
-      }
+        
 
     }, 5000);
   });
 
   socket.on('CTOS-RAISE', () => {
+    rooms[roomId].playerGoingToWin = -1;
     rooms[roomId].raiseActionDone = true;
     clientWhoOpened = socket.id;
     const Openedclient = rooms[roomId].clients.find(client => client.id === clientWhoOpened);
@@ -152,19 +152,12 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('STOC-SHOW-RAISED-CARDS', poppedElements, poppedSuits)
 
     if (rooms[roomId].playinguserfail) {
-      rooms[roomId].playinguserwon = false
       console.log("cardstackback:", rooms[roomId].CardStack);
       rooms[roomId].currentTurnIndex = (rooms[roomId].openedClientIndex - 1) % rooms[roomId].clients.length;
       console.log("CURRENT INDEX OF PREVIOUS ONE:(playing user fail)", rooms[roomId].currentTurnIndex);
       rooms[roomId].playinguser.emit('STOC1C-DUMP-PENALTY-CARDS', rooms[roomId].CardStack, poppedElements, rooms[roomId].SuitStack, poppedSuits);
 
     } else {
-      if (rooms[roomId].playinguserwon) {
-        console.log("playinguser won");
-        rooms[roomId].wonUsers.push(rooms[roomId].nextPlayer.position);
-        io.to(roomId).playinguser.emit('STOC-PLAYER-WON', rooms[roomId].nextPlayer.position);
-        rooms[roomId].playinguserwon = false
-      }
       rooms[roomId].currentTurnIndex = (rooms[roomId].playingClientIndex - 1) % rooms[roomId].clients.length;
       console.log("CURRENT INDEX OF PREVIOUS ONE:(opened user fail)", rooms[roomId].currentTurnIndex);
       Openedclient.emit('STOC1C-DUMP-PENALTY-CARDS', rooms[roomId].CardStack, poppedElements, rooms[roomId].SuitStack, poppedSuits);
