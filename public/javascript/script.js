@@ -1,5 +1,3 @@
-//hi
-
   var pos;
   var next;
   var selectedCards = [];
@@ -31,7 +29,6 @@ document.addEventListener('keydown', (event) => {
     }
   })
 
-
   socket.on('STO1C-SET-POSITION', (index) => {
     pos = index;
     var player = document.getElementById(`user${pos}`)
@@ -39,7 +36,6 @@ document.addEventListener('keydown', (event) => {
     player.innerText = 'You'
     console.log("playorder:", index);
   });
-
 
   function startShufflingEffect() {
     // Get the card container element
@@ -67,12 +63,8 @@ document.addEventListener('keydown', (event) => {
     startShufflingEffect();
   });
 
-
-
   const toSelected = (card, newCard, cardContainer) => {
-    //console.log("clicked card:", card);
     selectedCards.push(card);
-
     cardContainer.removeChild(newCard);
     newCard.className = 'col-6 col-sm-4 col-lg-2 offset-lg-0 cards'
     const selectionContainer = document.getElementById('container_placing');
@@ -129,7 +121,6 @@ document.addEventListener('keydown', (event) => {
   socket.on('STO1C-DRAW-CARDS', (subpartition) => {
     console.log("received subpartition:", subpartition);
     const cardContainer = document.getElementById('card-container');
-
     cardContainer.innerHTML = '';
     // Loop through each card in the subpartition array
     subpartition.forEach((card) => {
@@ -145,19 +136,16 @@ document.addEventListener('keydown', (event) => {
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
     });
-
     sort_cards('card-container');
   });
 
   socket.on('STOC-SET-WHOS-TURN', (nextPlayerPosition) => {
     next = nextPlayerPosition;
-
     console.log("next player is:player", next);
     if (next === pos) {
       console.log("your turn comes");
       const placeBtn = document.getElementById('place-btn')
       placeBtn.disabled = false;
-
       //Fixme : pass button should not be visible on new game start
       const passBtn = document.getElementById('pass-btn')
       passBtn.disabled = false;
@@ -169,22 +157,18 @@ document.addEventListener('keydown', (event) => {
       const passBtn = document.getElementById('pass-btn')
       passBtn.disabled = true;
     }
-
   });
 
   const placeCards = () => {
     var cardContainer = document.getElementById('card-container');
     var cards_remaining = cardContainer.childElementCount;
-
     var input = document.getElementById('input');
     var bluff_text = input.value
     input.value = ''
-
     socket.emit('CTOS-PLACE-CARD', selectedCards, bluff_text, cards_remaining);
     selectedCards = [];
     const selectionContainer = document.getElementById('container_placing');
     selectionContainer.innerHTML = '';    
-
     const placeBtn = document.getElementById('place-btn')
     placeBtn.disabled = true;
   }
@@ -197,17 +181,14 @@ document.addEventListener('keydown', (event) => {
     }
   });
 
-
   socket.on('STOC-RAISE-TIME-OVER', () => {
     console.log("raise time over")
     const raiseBtn = document.getElementById('raise-btn')
     raiseBtn.disabled = true;
   });
 
-
   socket.on('STOC-GAME-PLAYED', (CardCount, bluffText) => {
     console.log("STOC-GAME-PLAYED:", CardCount, bluffText)
-    //textElement.textContent = `${CardCount} ${InputValue}`;
     const playingContainer = document.getElementById('container_played');
     for (var i = 1; i <= CardCount; i++) {
       // Create a new card element
@@ -216,45 +197,32 @@ document.addEventListener('keydown', (event) => {
       newCard.id = bluffText;
       newCard.setAttribute('tabindex', '0');
       newCard.textContent = bluffText;
-
       // Append the card to the card container;
       playingContainer.appendChild(newCard);
     }
   });
 
-
   function raisecards() {
     console.log("Raise");
     socket.emit('CTOS-RAISE');
-
-    // To avoid further calls
     const raiseBtn = document.getElementById('raise-btn')
     raiseBtn.disabled = true;
-  }
-
-
-  //make show the opened cards to all the users by the event coming from server side which is showopencards with the set of openedcards which is poppedElements
+  }  
+  
   socket.on('STOC-SHOW-RAISED-CARDS', (poppedElements, poppedSuits) => {
     console.log("openedcards:", poppedElements);
     // Get a reference to the OpenedCards div
     //var openedCardsDiv = document.querySelector('.OpenedCards');
     const playedContainer = document.getElementById('container_played');
-    // Clear the existing content of the OpenedCards div
-    //playedContainer.innerHTML = '';
-
     poppedElements.forEach((element, index) => {
       playedContainer.removeChild(playedContainer.lastChild);
     });
-
-
-
-    // Create a new element for each popped element and add it to the OpenedCards div
+    // Create a new element for each popped element 
     poppedElements.forEach((element, index) => {
       var cardElement = document.createElement('div');
       cardElement.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
       cardElement.textContent = poppedSuits[index] + element;;
       playedContainer.appendChild(cardElement);
-      //cardContainer.appendChild(cardElement);
     });
   });
 
@@ -270,7 +238,6 @@ document.addEventListener('keydown', (event) => {
       cardsGivingBack.push(CardStack.pop());
       suitsBack.push(SuitStack.pop());
     }
-    //console.log("cards for faileduser:",CardStack,poppedElements);
     console.log("cards for faileduser:", cardsGivingBack);
     console.log("suits for faileduser:", suitsBack);
     const cardContainer = document.getElementById('card-container');
@@ -293,7 +260,6 @@ document.addEventListener('keydown', (event) => {
     });
     console.log("Number of cards in the container:", cardContainer.childElementCount);
     containerCount = cardContainer.childElementCount;
-
     sort_cards('card-container');
   })
 
@@ -305,19 +271,17 @@ document.addEventListener('keydown', (event) => {
     console.log("this play over .");
     const playedContainer = document.getElementById('container_played');
     playedContainer.innerHTML = "";
-
-  }
-
-  );
-
-  socket.on('STOC-PLAYER-WON', () => {
-    console.log("congrats you won  🎉🎉");
   });
-  
+  socket.on('STOC-PLAYER-WON', (player_position) => {
+    console.log("Player winned ", player_position);
+    var player = document.getElementById(`user${player_position}`)
+    player.style.backgroundColor = "#97FF00";
+    if(pos === player_position){
+      alert("Won!");
+    }
+  });
 
   socket.on('disconnect', () => {
     // Handle the disconnection
     console.log('Disconnected from the server.');
   });
-
-

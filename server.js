@@ -1,4 +1,3 @@
-//hii
 var express = require("express");
 var app = express()
 var http = require("http").createServer(app)
@@ -44,6 +43,7 @@ io.on('connection', (socket) => {
       CardStack: [], // Card stack specific to the room
       SuitStack: [], // Suit stack specific to the room
       passedPlayers: [],
+      wonUsers:[],
       // Add other room-specific variables as needed
       lastPlayedCardCount: undefined,
       currentTurnIndex: -1,// Index of the current turn player
@@ -77,13 +77,10 @@ io.on('connection', (socket) => {
   }
   function executeDuringDelay(roomId) {
     console.log(roomId);
-    //io.socket.emit('STOC-SHUFFLING', 'shuffle');
     io.to(roomId).emit('STOC-SHUFFLING', 'shuffle')
   }
 
-
   socket.on('CTOS-PLACE-CARD', (selectedCards, bluff_text, remainingCards) => {
-
     lastPlayedCardCount = selectedCards.length;
     rooms[roomId].playinguserfail = false;
     selectedCards.forEach((card) => {
@@ -103,25 +100,26 @@ io.on('connection', (socket) => {
     var clientPlaying = socket.id;
     rooms[roomId].playinguser = rooms[roomId].clients.find(client => client.id === clientPlaying);
     rooms[roomId].playingClientIndex = rooms[roomId].clients.findIndex(client => client.id === rooms[roomId].playinguser);
-
-
-    if (rooms[roomId].playinguser) {
-
-    } else {
-      console.log('Client not found or not connected');
-    }
+    console.log("PLAYING CLIENT INDEX:",rooms[roomId].playingClientIndex);
     rooms[roomId].bluff_text = bluff_text;
     console.log("input:", rooms[roomId].bluff_text);
     io.to(roomId).emit('STOC-GAME-PLAYED', lastPlayedCardCount, rooms[roomId].bluff_text)
     io.to(roomId).emit('STOC-RAISE-TIME-START');
     setTimeout(() => {
-      io.to(roomId).emit('STOC-RAISE-TIME-OVER',);
-      if (rooms[roomId].raiseActionDone === false) {
+      
+      if (!rooms[roomId].raiseActionDone) {
+        io.to(roomId).emit('STOC-RAISE-TIME-OVER',);
+        if(rooms[roomId].playinguserwon ){
+          rooms[roomId].wonUsers.push(rooms[roomId].nextPlayer.position)
+          io.to(roomId).emit('STOC-PLAYER-WON', rooms[roomId].nextPlayer.position);
+          rooms[roomId].playinguserwon=false;
+        }
         changeTurn(roomId, io);
       }
 
     }, 5000);
   });
+
   socket.on('CTOS-RAISE', () => {
     rooms[roomId].raiseActionDone = true;
     clientWhoOpened = socket.id;
@@ -158,20 +156,19 @@ io.on('connection', (socket) => {
       console.log("cardstackback:", rooms[roomId].CardStack);
       rooms[roomId].currentTurnIndex = (rooms[roomId].openedClientIndex - 1) % rooms[roomId].clients.length;
       console.log("CURRENT INDEX OF PREVIOUS ONE:(playing user fail)", rooms[roomId].currentTurnIndex);
-
       rooms[roomId].playinguser.emit('STOC1C-DUMP-PENALTY-CARDS', rooms[roomId].CardStack, poppedElements, rooms[roomId].SuitStack, poppedSuits);
 
     } else {
       if (rooms[roomId].playinguserwon) {
         console.log("playinguser won");
-        rooms[roomId].playinguser.emit('STOC-PLAYER-WON');
+        rooms[roomId].wonUsers.push(rooms[roomId].nextPlayer.position);
+        io.to(roomId).playinguser.emit('STOC-PLAYER-WON', rooms[roomId].nextPlayer.position);
         rooms[roomId].playinguserwon = false
       }
       rooms[roomId].currentTurnIndex = (rooms[roomId].playingClientIndex - 1) % rooms[roomId].clients.length;
       console.log("CURRENT INDEX OF PREVIOUS ONE:(opened user fail)", rooms[roomId].currentTurnIndex);
       Openedclient.emit('STOC1C-DUMP-PENALTY-CARDS', rooms[roomId].CardStack, poppedElements, rooms[roomId].SuitStack, poppedSuits);
-
-    }
+     }
     rooms[roomId].CardStack = [];
     rooms[roomId].SuitStack = [];
     console.log("THIS OVER");
@@ -183,23 +180,17 @@ io.on('connection', (socket) => {
 
   });
 
-
   socket.on('CTOS-PASS', (pos) => {
-    // console.log("client list:",rooms[roomId].clients);
-    //console.log("passedplayer:",pos);
     rooms[roomId].passedPlayers.push(pos)
-    // console.log("passedplayer length ,clients length",rooms[roomId].passedPlayers.length,rooms[roomId].clients.length)
-
-    if (rooms[roomId].passedPlayers.length === rooms[roomId].clients.length) {
+    console.log("PASSED PLAYER LENGTH , WON PLAYER LENGTH:",rooms[roomId].passedPlayers.length,rooms[roomId].wonUsers.length)
+    if (rooms[roomId].passedPlayers.length===(rooms[roomId].clients.length- rooms[roomId].wonUsers.length ))
+     {
       io.to(roomId).emit('STOC-PLAY-OVER');
       rooms[roomId].passedPlayers.length = 0;
       setTimeout(() => {
-        /* rooms[roomId].currentTurnIndex = ((pos-1) - 1) % rooms[roomId].clients.length;
-         changeTurn(roomId);*/
         pos = (pos - 1) % rooms[roomId].clients.length;
         rooms[roomId].currentTurnIndex = pos - 1;
         changeTurn(roomId);
-
       }, 5000);
     }
     else {
@@ -207,9 +198,7 @@ io.on('connection', (socket) => {
       //isNextPlayerPassed(pos);
       rooms[roomId].currentTurnIndex = pos - 1;
       changeTurn(roomId);
-
     }
-
   });
 
   socket.on('disconnect', () => {
@@ -237,27 +226,21 @@ function assignTurns(roomId) {
 function changeTurn(roomId) {
   rooms[roomId].currentTurnIndex = (rooms[roomId].currentTurnIndex + 1) % rooms[roomId].clients.length;
   rooms[roomId].nextPlayer = rooms[roomId].clients[rooms[roomId].currentTurnIndex];
-  // Emit an event to the next player indicating it's their turn
   var nextPlayerPosition = rooms[roomId].nextPlayer.position;
   console.log("nextPlayerPosition is", nextPlayerPosition);
-  if (rooms[roomId].passedPlayers.length != 0) {
-    if (rooms[roomId].passedPlayers.includes(nextPlayerPosition)) {
+  console.log("passedplayerarray,wonplayerarray   ",rooms[roomId].passedPlayers,rooms[roomId].wonUsers )
+    if ( rooms[roomId].passedPlayers.includes(nextPlayerPosition)|| rooms[roomId].wonUsers.includes(nextPlayerPosition ))
+    {
       nextPlayerPosition = (nextPlayerPosition - 1) % rooms[roomId].clients.length;
-      //isNextPlayerPassed(pos);
       rooms[roomId].currentTurnIndex = nextPlayerPosition;
       changeTurn(roomId);
     }
-    else {
+   else {
       io.to(roomId).emit('STOC-SET-WHOS-TURN', (nextPlayerPosition));
     }
   }
-  else {
-    io.to(roomId).emit('STOC-SET-WHOS-TURN', (nextPlayerPosition));
-  }
-
-}
+  
 http.listen(3000, () => {
   console.log("connected to server");
 }
 )
-
