@@ -282,6 +282,12 @@ document.addEventListener('keydown', (event) => {
     }
   });
 
+  socket.on('STOC-GAME-OVER',(wonUsers)=>{
+  console.log("GAME OVER ");
+  console.log("THE WINNERS ARE:",wonUsers);
+  });
+
+
   socket.on('disconnect', () => {
     // Handle the disconnection
     console.log('Disconnected from the server.');
