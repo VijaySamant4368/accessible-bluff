@@ -272,6 +272,7 @@ document.addEventListener('keydown', (event) => {
     const playedContainer = document.getElementById('container_played');
     playedContainer.innerHTML = "";
   });
+  
   socket.on('STOC-PLAYER-WON', (player_position) => {
     console.log("Player winned ", player_position);
     var player = document.getElementById(`user${player_position}`)
