@@ -1,9 +1,82 @@
   var pos;
   var next;
-  var selectedCards = [];
 
   var socket = io();
 
+  // To prevent adding listeners while sorting
+  var listenNodeInserted = true;
+
+  const card_container = document.getElementById('card-container');
+  card_container.addEventListener("DOMNodeInserted", function(){
+
+      if(listenNodeInserted){
+        console.log("Item added to container cards")
+
+        const card_id = card_container.lastChild.id;
+        
+        ['click','keydown'].forEach( function(evt) {
+
+          card_container.lastChild.addEventListener(evt, (event) => {
+
+            if(evt == 'click' || (evt == 'keydown' && event.keyCode == 13) ){
+
+              const card = document.getElementById(card_id);
+
+              const selectionContainer = document.getElementById('container_placing');
+
+              const newCard2 = document.createElement('div');
+              newCard2.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
+              newCard2.id = card.id;
+              newCard2.setAttribute('tabindex', '0');
+              newCard2.textContent = card.textContent;
+
+              selectionContainer.appendChild(newCard2);
+
+              card_container.removeChild(card);
+            }
+
+          }, { once: true });
+        });
+      }
+  });
+
+  const placing_container = document.getElementById('container_placing');
+  placing_container.addEventListener("DOMNodeInserted", function(){
+
+    console.log("Item added to container placing")
+    const card_id = placing_container.lastChild.id;
+
+    ['click','keydown'].forEach( function(evt) {
+      placing_container.lastChild.addEventListener(evt, (event) => {
+
+        if(evt == 'click' || (evt == 'keydown' && event.keyCode == 13) ){
+          const card = document.getElementById(card_id);
+
+          const card_container = document.getElementById('card-container');
+
+          const newCard2 = document.createElement('div');
+          newCard2.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
+          newCard2.id = card.id;
+          newCard2.setAttribute('tabindex', '0');
+          newCard2.textContent = card.textContent;
+
+          card_container.appendChild(newCard2);
+
+          placing_container.removeChild(card);
+
+          // Sort array while adding each item 
+          listenNodeInserted = false;
+          sort_cards('card-container')
+          listenNodeInserted = true;
+        }
+
+      }, { once: true });
+    });
+
+  });
+
+
+  
   const passButton = document.getElementById('pass-btn');
 
 document.addEventListener('keydown', (event) => {
@@ -63,24 +136,6 @@ document.addEventListener('keydown', (event) => {
     startShufflingEffect();
   });
 
-  const toSelected = (card, newCard, cardContainer) => {
-    selectedCards.push(card);
-    cardContainer.removeChild(newCard);
-    newCard.className = 'col-6 col-sm-4 col-lg-2 offset-lg-0 cards'
-    const selectionContainer = document.getElementById('container_placing');
-    selectionContainer.appendChild(newCard);
-    newCard.addEventListener('click', () => {
-      selectedCards.splice(selectedCards.indexOf(card), 1);
-      console.log(selectedCards);
-      selectionContainer.removeChild(newCard);
-      newCard.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
-      cardContainer.appendChild(newCard);
-      newCard.addEventListener('click', () => {
-        toSelected(card, newCard, cardContainer);
-
-      }, { once: true })
-    }, { once: true });
-  }
 
   function get_value(item){
     if (item === 'A')
@@ -130,13 +185,13 @@ document.addEventListener('keydown', (event) => {
       newCard.id = card.suit + card.value;
       newCard.setAttribute('tabindex', '0');
       newCard.textContent = card.suit + card.value;
-      newCard.addEventListener('click', () => {
-        toSelected(card, newCard, cardContainer);
-      }, { once: true });
+
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
     });
+    listenNodeInserted = false;
     sort_cards('card-container');
+    listenNodeInserted = true;
   });
 
   socket.on('STOC-SET-WHOS-TURN', (nextPlayerPosition) => {
@@ -165,9 +220,17 @@ document.addEventListener('keydown', (event) => {
     var input = document.getElementById('input');
     var bluff_text = input.value
     input.value = ''
-    socket.emit('CTOS-PLACE-CARD', selectedCards, bluff_text, cards_remaining);
-    selectedCards = [];
+
     const selectionContainer = document.getElementById('container_placing');
+    var selectedCards = [];
+    for (var i=0; i<selectionContainer.children.length; i++) {
+      const cardObject = {
+        suit: selectionContainer.children[i].textContent.slice(0, 1),
+        value: selectionContainer.children[i].textContent.slice(1)
+      };
+      selectedCards.push(cardObject);       
+    }
+    socket.emit('CTOS-PLACE-CARD', selectedCards, bluff_text, cards_remaining);
     selectionContainer.innerHTML = '';    
     const placeBtn = document.getElementById('place-btn')
     placeBtn.disabled = true;
@@ -222,6 +285,7 @@ document.addEventListener('keydown', (event) => {
       var cardElement = document.createElement('div');
       cardElement.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
       cardElement.textContent = poppedSuits[index] + element;;
+      cardElement.style.backgroundColor = "#ff0000";
       playedContainer.appendChild(cardElement);
     });
   });
@@ -248,19 +312,15 @@ document.addEventListener('keydown', (event) => {
       newCard.setAttribute('tabindex', '0');
       newCard.textContent = suitsBack[index] + cardvalue;
       newCard.style.backgroundColor = "#ff0000";
-      const cardObject = {
-        suit: suitsBack[index],
-        value: cardvalue
-      };
-      newCard.addEventListener('click', () => {
-        toSelected(cardObject, newCard, cardContainer);
-      }, { once: true });
+ 
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
     });
     console.log("Number of cards in the container:", cardContainer.childElementCount);
     containerCount = cardContainer.childElementCount;
+    listenNodeInserted = false;
     sort_cards('card-container');
+    listenNodeInserted = true;
   })
 
   function passaction(){
