@@ -181,6 +181,8 @@ io.on('connection', (socket) => {
     rooms[roomId].passedPlayers.push(pos)
     console.log("PASSED PLAYER LENGTH , WON PLAYER LENGTH:", rooms[roomId].passedPlayers.length, rooms[roomId].wonUsers.length)
     if (rooms[roomId].passedPlayers.length === (rooms[roomId].clients.length - rooms[roomId].wonUsers.length)) {
+      rooms[roomId].CardStack = [];
+      rooms[roomId].SuitStack = [];
       io.to(roomId).emit('STOC-PLAY-OVER');
       rooms[roomId].passedPlayers.length = 0;
       setTimeout(() => {
