@@ -13,6 +13,12 @@
     background-color: #cccccc;
   }
 
+  .cards:focus {
+    outline: none !important;
+    border:3px solid red;
+    box-shadow: 0 0 10px #719ECE;
+  }
+
   .cardsContainer {
     display: flex;
     gap: 5px;
@@ -54,6 +60,26 @@
     gap: 5px;
   }*/
 
+  button {
+    border: 3px solid #000000;
+    background-color: #33ff00;
+    color: #000000;
+    padding: 5px 10px;
+  }
+  
+  button:hover {
+    border: 3px solid #0099cc;
+    background-color: #0044fd;
+    color: #ffffff;
+    padding: 5px 10px;
+  }
+  
+  button:disabled,
+  button[disabled]{
+    border: 3px solid #000000;
+    background-color: #ff0000;
+    color: #000000;
+  }
 
   .loading-animation {
     /* Add your loading animation styles here */
@@ -74,4 +100,42 @@
     margin-top: 10px;
     text-align: center;
 
+  }
+
+  .loader {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+  }
+  
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .split {
+    height: 50%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    overflow-x: hidden;
+    padding-top: 20px;
+  }
+  
+  .left {
+    left: 0;
+  }
+  
+  .right {
+    right: 0;
   }

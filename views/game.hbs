@@ -14,47 +14,31 @@
 <body>
 
   <!-- Start: main -->
-  <div class="container-fluid py-3">
+  <div class="container-fluid py-3" role="application">
     <!-- Start: players container -->
-    <div class="playersContainer col-12 px-4" id="player-container" tabindex="0">
-
-
-
-
-    </div>
+    <div class="playersContainer col-12 px-4" id="player-container" role="application" tabindex="0"> </div>
     <!-- End: players container -->
     <!-- Start: playing cards container -->
-    <div class="col-12 cardsContainer" id="card-container" tabindex="0">
+    <div class="col-12 cardsContainer" id="card-container" role="application" tabindex="0"></div>
 
-
+    <div class="col-12 buttonContainer"> 
+      <button id="place-btn" class="col-4 button" type="button" onclick="placeCards()" disabled="true" tabindex="0">Place</button>
+      <button id="raise-btn" class="col-4 button" type="button" onclick="raisecards()" disabled="true">Raise</button>
+      <button id="pass-btn" class="col-4 button" type="button"  onclick="passaction()" disabled="true">Pass</button>
     </div>
-    <!-- End: playing cards container -->
-    <div class="playGround my-5">
-      <div class="col-6 col-sm-5 selectionContainer p-4">
-        <label class="form-label" role="note">Selected cards</label>
-        <!-- Start: selected cards container -->
-        <div class="col-12 cardsContainer" id="container_placing" tabindex="0">
-        </div>
-        <!-- End: selected cards container -->
-      <button id="place-btn" class="btn btn-primary" type="button" onclick="placeCards()"
-            disabled="true" tabindex="0">Place</button>
 
-      </div>
-      <div class="col-6 col-sm-5 selectionContainer p-4">
-        <label class="form-label" role="note">Cards played</label>
-        <!-- Start: played cards container -->
-        <div class="col-12 cardsContainer" id="container_played" tabindex="0">
+    <div class="col-12 cardsContainer" id="container_played" role="application" tabindex="0"> </div>
+
+    <div class="col-12">
+        <div class="split left" id="notification-area" ></div>
+        <div class="split right">
+          Keyboard shortcuts :&emsp;J-Place&emsp;F-Raise&emsp;;-Pass&emsp;.-Say-selected-cards<br>
+          [-Select-first-card-in-deck&emsp;]-Select-last-card-in-deck&emsp;Z-Say-last-game &emsp;0-Say-all-cards-as-sets <br>
+           <div class="col-12 col-sm-5 p-4" id="rise-spinner-area" ></div>
         </div>
-        <!-- End: played cards container -->
-        <div class="buttonContainer"><button id="raise-btn" class="btn btn-primary" type="button" onclick="raisecards()"
-            disabled="true">Raise</button><button id="pass-btn" class="btn btn-primary" type="button"  onclick="passaction()"
-            disabled="true">Pass</button></div>
-      </div>
     </div>
-    <div> Keyboard shortcuts :&emsp;P-Place&emsp;R-Raise&emsp;;-Pass&emsp;H-Notify selected cards<br>
-    F-select-first-card-in-deck&emsp;J-select-last-card-in-deck <br>
-    D-select-first-placed-card&emsp;K-select-last-placed-card<br>
-    S-select-first-played-card&emsp;L-select-last-played-card</div>
+   
+
 
   </div><!-- End: main -->
 

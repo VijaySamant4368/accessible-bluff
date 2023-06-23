@@ -1,5 +1,9 @@
   var pos;
-  var next;
+  var whosTurn;
+  var newGame;
+
+  var lastGameCardCount = 0;
+  var lastGameBluffText = "Nothing"
 
   var socket = io();
 
@@ -16,12 +20,15 @@
 
     window.setTimeout(function () {
       document.getElementById(id).innerHTML = text;
-    }, 100);
+    }, 1000);
 
     window.setTimeout(function () {
-        document.body.removeChild(document.getElementById(id));
+      document.body.removeChild(document.getElementById(id));
     }, 10000);
-}
+  }
+
+
+  const playedContainer = document.getElementById('container_played');
 
   const card_container = document.getElementById('card-container');
   card_container.addEventListener("DOMNodeInserted", function(){
@@ -39,116 +46,120 @@
 
               const card = document.getElementById(card_id);
 
-              const selectionContainer = document.getElementById('container_placing');
+              card.selected = !card.selected;
 
-              const newCard2 = document.createElement('div');
-              newCard2.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
-              newCard2.id = card.id;
-              newCard2.setAttribute('tabindex', '1');
-              newCard2.setAttribute('role', 'button');
-              newCard2.setAttribute('title', 'on selected');
-              newCard2.textContent = card.textContent;
-
-              notifyScreenReader("Card "+card.textContent+" added.")
-
-              selectionContainer.appendChild(newCard2);
-
-              card_container.removeChild(card);
+              if(card.selected){
+                notifyScreenReader(card_id+" Selected")
+                card.setAttribute('title', 'Selected');
+                card.style.backgroundColor = "#81ea74";
+              }
+              else{
+                notifyScreenReader(card_id+" Removed")
+                card.setAttribute('title', 'Unselected');
+                card.style.backgroundColor = "#b963ee";
+              }
             }
 
-          }, { once: true });
+          });
         });
       }
-  });
-
-  const placing_container = document.getElementById('container_placing');
-  placing_container.addEventListener("DOMNodeInserted", function(){
-
-    console.log("Item added to container placing")
-    const card_id = placing_container.lastChild.id;
-
-    ['click','keydown'].forEach( function(evt) {
-      placing_container.lastChild.addEventListener(evt, (event) => {
-
-        if(evt == 'click' || (evt == 'keydown' && event.keyCode == 13) ){
-          const card = document.getElementById(card_id);
-
-          const card_container = document.getElementById('card-container');
-
-          const newCard2 = document.createElement('div');
-          newCard2.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
-          newCard2.id = card.id;
-          newCard2.setAttribute('tabindex', '1');
-          newCard2.setAttribute('role', 'button');
-          newCard2.setAttribute('title', 'on deck');
-          newCard2.textContent = card.textContent;
-
-          notifyScreenReader("Card "+card.textContent+" removed.")
-
-          card_container.appendChild(newCard2);
-
-          placing_container.removeChild(card);
-
-          // Sort array while adding each item 
-          listenNodeInserted = false;
-          sort_cards('card-container')
-          listenNodeInserted = true;
-        }
-
-      }, { once: true });
-    });
-
   });
 
 
 
   document.addEventListener('keydown', (event) => {
+    // Pass
     if (event.key.toLowerCase() === ';') {
-      passaction();
+      if(document.getElementById("pass-btn").disabled == true){
+        notifyScreenReader("Pass not possible");
+      }
+      else{
+        document.getElementById("pass-btn").click();
+      }
     }
-    else if (event.key.toLowerCase() === 'r') {
-      raisecards();
-    }
-    else if (event.key.toLowerCase() === 'p') {
-      placeCards();
-    }
+    // Raise
     else if (event.key.toLowerCase() === 'f') {
+      if(document.getElementById("raise-btn").disabled == true){
+        notifyScreenReader("Raise not possible");
+      }
+      else{
+        document.getElementById("raise-btn").click();
+      }
+    }
+    // Place
+    else if (event.key.toLowerCase() === 'j') {
+      if(document.getElementById("place-btn").disabled == true){
+        notifyScreenReader("Place not possible");
+      }
+      else{
+        document.getElementById("place-btn").click();
+      }
+    }
+    else if (event.key.toLowerCase() === '[') {
       card_container.firstChild.focus();
     }
-    else if (event.key.toLowerCase() === 'j') {
+    else if (event.key.toLowerCase() === ']') {
       card_container.lastChild.focus();
     }
-    else if (event.key.toLowerCase() === 'd') {
-      placing_container.firstElementChild.focus();
-    }
-    else if (event.key.toLowerCase() === 'k') {
-      placing_container.lastChild.focus();
-    }
-    else if (event.key.toLowerCase() === 's') {
-      const playedContainer = document.getElementById('container_played');
-      playedContainer.firstElementChild.focus();
-    }
-    else if (event.key.toLowerCase() === 'l') {
-      const playedContainer = document.getElementById('container_played');
-      playedContainer.lastChild.focus();
-    }
-    else if (event.key.toLowerCase() === 'h'){
+    // Say selected cards
+    else if (event.key.toLowerCase() === '.'){
       var messageSelectedCards = "Selected cards : ";
-      for (var i=0; i<placing_container.children.length; i++) {
-        messageSelectedCards = messageSelectedCards.concat(placing_container.children[i].textContent+" ");
+      for (var i=0; i<card_container.children.length; i++) {
+        if(card_container.children[i].selected == true){
+          messageSelectedCards = messageSelectedCards.concat(card_container.children[i].textContent+" ");
+        }
       }
       notifyScreenReader(messageSelectedCards);
     }
+    // Say last game
+    else if (event.key.toLowerCase() === 'z'){
+      var turnMessage = "Current Player : "+(whosTurn+1);
+      if(pos == whosTurn){
+        turnMessage = "Your turn!"
 
+      }
+      if(playedContainer.children.length == 0){
+        notifyScreenReader("Nothing played!"+turnMessage );
+      }else{
+      var messageSelectedCards = "Last played "+lastGameCardCount+
+      " cards as "+lastGameBluffText+
+      " Total played cards : "+playedContainer.children.length+turnMessage;
+      notifyScreenReader(messageSelectedCards);
+      }
+    }
+    // Say all cards as set cards
+    else if (event.key.toLowerCase() === '0'){
+      var cardsInfo = "Cards in hand : ";
+      var currentCard = card_container.children[0].textContent.slice(1)
+      var cardCount = 1;
+      for (var i=1; i<card_container.children.length; i++) {
+        if(card_container.children[i].textContent.slice(1) == currentCard){
+          cardCount = cardCount + 1;
+        }
+        else{
+          cardsInfo = cardsInfo.concat(cardCount+","+currentCard+", ");
+          var currentCard = card_container.children[i].textContent.slice(1);
+          var cardCount = 1;
+        }
+      }
+
+      if(cardCount){
+        cardsInfo = cardsInfo.concat(cardCount+"-"+currentCard+".");
+      }
+
+      notifyScreenReader(cardsInfo);
+    }
 
 
     return true;
   });
 
   socket.on('STOC-SET-NUMBER-OF-PLAYERS', (total) => {
+    numberOfPlayers = total;
     const playerContainer = document.getElementById('player-container')
-    for (i = 1; i <= total; i++) {
-      playerContainer.innerHTML += `<div class="user p-1" tabindex="0"><i class="far fa-user"></i><span id="user${i}">user${i}</span></div>`
+    playerContainer.innerHTML = ''
+    for (i = 0; i < numberOfPlayers; i++) {
+      playerContainer.innerHTML += `<div class="user p-1" tabindex="0"><i class="far fa-user"></i><span id="user${i}">user${i+1}</span></div>`
     }
   })
 
@@ -158,7 +169,7 @@
     player.innerHTML = ''
     player.innerText = 'You'
     console.log("playorder:", index);
-    notifyScreenReader("You are in position : "+index, "polite");
+    notifyScreenReader("You are in position : "+(index+1), "polite");
   });
 
   function startShufflingEffect() {
@@ -237,7 +248,11 @@
       newCard.id = card.suit + card.value;
       newCard.setAttribute('tabindex', '1');
       newCard.setAttribute('role', 'button');
-      newCard.setAttribute('title', 'on deck');
+      newCard.setAttribute('title', 'Unselected');
+      newCard.selected = false;
+      newCard.style.backgroundColor = "#b963ee";
+      newCard.style.fontSize = "xxx-large";
+      newCard.style.textAlign = "center";
       newCard.textContent = card.suit + card.value;
 
       // Append the card to the card container;
@@ -250,60 +265,84 @@
     notifyScreenReader("Cards received!", "assertive");
   });
 
-  socket.on('STOC-SET-WHOS-TURN', (nextPlayerPosition) => {
-    next = nextPlayerPosition;
-    console.log("next player is:player", next);
-    if (next === pos) {
+  socket.on('STOC-SET-WHOS-TURN', (value, value2) => {
+    whosTurn = value;
+    newGame = value2;
+
+    for (i = 0; i < numberOfPlayers; i++) {
+      var player = document.getElementById(`user${i}`)
+      if(i == whosTurn){
+        player.style.backgroundColor = "#90EE90";
+      }else{
+        player.style.backgroundColor = "#FFCCCB";
+      }
+    }
+    const passBtn = document.getElementById('pass-btn')
+    const placeBtn = document.getElementById('place-btn')
+    var messageWhosTurn = ""
+    if(newGame){ messageWhosTurn = "New Round! "}
+    if (whosTurn === pos) {
       console.log("your turn comes");
-      const placeBtn = document.getElementById('place-btn')
       placeBtn.disabled = false;
-      //Fixme : pass button should not be visible on new game start
-      const passBtn = document.getElementById('pass-btn')
-      passBtn.disabled = false;
-      notifyScreenReader("It's your turn!", "assertive");
+      if(newGame){ passBtn.disabled = true; } else { passBtn.disabled = false; }
+      messageWhosTurn = messageWhosTurn.concat("It's your turn!");
     }
     else {
-      const placeBtn = document.getElementById('place-btn')
       placeBtn.disabled = true;
-      const passBtn = document.getElementById('pass-btn')
       passBtn.disabled = true;
-      notifyScreenReader("It's "+next+" turn!", "assertive");
+      messageWhosTurn = messageWhosTurn.concat("It's "+(whosTurn+1)+" turn!");
     }
+    notifyScreenReader(messageWhosTurn, "assertive");
   });
 
   const placeCards = () => {
     var cardContainer = document.getElementById('card-container');
-    var cards_remaining = cardContainer.childElementCount;
+    var numberOfCardsInDeck = cardContainer.children.length
 
-    var bluff_text=prompt("Please enter bluff text","Bluff here");
-    if (bluff_text==null){
-       notifyScreenReader("Canceled!")
-       return;
+
+    if(newGame === true){
+      var bluff_text=prompt("Please enter bluff text","Bluff here");
+      if (bluff_text==null){
+        notifyScreenReader("Canceled!")
+        return;
+      }
     }
 
-    const selectionContainer = document.getElementById('container_placing');
     var selectedCards = [];
-    for (var i=0; i<selectionContainer.children.length; i++) {
-      const cardObject = {
-        suit: selectionContainer.children[i].textContent.slice(0, 1),
-        value: selectionContainer.children[i].textContent.slice(1)
-      };
-      selectedCards.push(cardObject);       
+    for (var i=cardContainer.children.length-1; i>=0; i--) {
+      if(cardContainer.children[i].selected == true){
+        const cardObject = {
+          suit: cardContainer.children[i].textContent.slice(0, 1),
+          value: cardContainer.children[i].textContent.slice(1)
+        };
+        selectedCards.push(cardObject);
+        cardContainer.removeChild(cardContainer.children[i]);
+      }
     }
+
+    if(selectedCards.length == 0){
+      notifyScreenReader("Nothing selected!")
+      return;
+    }
+
+    var cards_remaining = numberOfCardsInDeck-selectedCards.length;
     socket.emit('CTOS-PLACE-CARD', selectedCards, bluff_text, cards_remaining);
-    selectionContainer.innerHTML = '';    
-    const placeBtn = document.getElementById('place-btn')
-    placeBtn.disabled = true;
+    document.getElementById("place-btn").disabled = true;
+    document.getElementById("raise-btn").disabled = true;
     notifyScreenReader("Cards placed!", "assertive");
   }
 
   socket.on('STOC-RAISE-TIME-START', () => {
     console.log("raise time starts");
-    if (pos != next) {
+    if (pos != whosTurn) {
       const raiseBtn = document.getElementById('raise-btn')
       raiseBtn.disabled = false;
     }
     notifyScreenReader("Raise time starts!", "assertive");
+    const areaRaiseSpinner = document.getElementById('rise-spinner-area');
+    const raiseSpinner = document.createElement('div');
+    raiseSpinner.classList.add('loader');
+    areaRaiseSpinner.appendChild(raiseSpinner);
   });
 
   socket.on('STOC-RAISE-TIME-OVER', () => {
@@ -311,12 +350,22 @@
     const raiseBtn = document.getElementById('raise-btn')
     raiseBtn.disabled = true;
     notifyScreenReader("Raise time over!", "assertive");
+    const areaRaiseSpinner = document.getElementById('rise-spinner-area');
+    areaRaiseSpinner.innerHTML = "";
+
   });
 
-  socket.on('STOC-GAME-PLAYED', (CardCount, bluffText) => {
-    console.log("STOC-GAME-PLAYED:", CardCount, bluffText)
+  socket.on('STOC-GAME-PLAYED', (cardCount, bluffText) => {
+    lastGameCardCount = cardCount;
+    lastGameBluffText = bluffText;
+    if(cardCount == 0){
+      notifyScreenReader("Passed!", "assertive");
+      return;
+    }
+
+    console.log("STOC-GAME-PLAYED:", cardCount, bluffText)
     const playingContainer = document.getElementById('container_played');
-    for (var i = 1; i <= CardCount; i++) {
+    for (var i = 1; i <= cardCount; i++) {
       // Create a new card element
       const newCard = document.createElement('div');
       newCard.className = 'col-4 col-sm-2 col-lg-1 offset-lg-0 cards ';
@@ -324,21 +373,23 @@
       newCard.setAttribute('tabindex', '1');
       newCard.setAttribute('role', 'button');
       newCard.setAttribute('title', 'on played');
-      newCard.textContent = bluffText;
+      newCard.style.fontSize = "xxx-large";
+      newCard.style.textAlign = "center";
+      newCard.textContent = bluffText+" ";
       // Append the card to the card container;
       playingContainer.appendChild(newCard);
     }
-    notifyScreenReader("Game played. "+CardCount+" cards played as "+bluffText, "assertive");
+    notifyScreenReader("Played. "+cardCount+" cards played as "+bluffText, "assertive");
   });
 
   function raisecards() {
     console.log("Raise");
-    socket.emit('CTOS-RAISE');
+    socket.emit('CTOS-RAISE', pos);
     const raiseBtn = document.getElementById('raise-btn')
     raiseBtn.disabled = true;
   }  
   
-  socket.on('STOC-SHOW-RAISED-CARDS', (poppedElements, poppedSuits) => {
+  socket.on('STOC-SHOW-RAISED-CARDS', (poppedElements, poppedSuits, winner, loser) => {
     console.log("openedcards:", poppedElements);
     // Get a reference to the OpenedCards div
     //var openedCardsDiv = document.querySelector('.OpenedCards');
@@ -357,9 +408,15 @@
       cardElement.setAttribute('role', 'button');
       cardElement.setAttribute('title', 'on raised');
       cardElement.style.backgroundColor = "#ff0000";
+      cardElement.style.fontSize = "xxx-large";
+      cardElement.style.textAlign = "center";
       playedContainer.appendChild(cardElement);
     });
-    notifyScreenReader("Raiced cards : "+items, "assertive");
+    var raisesCardsMessage = "Raiced cards : "+items+
+    " User "+(winner+1)+" got the turn! User "+(loser+1)+" got the penality!"
+    notifyScreenReader(raisesCardsMessage, "assertive");
+    const areaRaiseSpinner = document.getElementById('rise-spinner-area');
+    areaRaiseSpinner.innerHTML = "";
   });
 
   socket.on('STOC1C-DUMP-PENALTY-CARDS', (CardStack, poppedElements, SuitStack, poppedSuits) => {
@@ -385,10 +442,13 @@
       newCard.id = suitsBack[index] + cardvalue;
       newCard.setAttribute('tabindex', '1');
       newCard.setAttribute('role', 'button');
-      newCard.setAttribute('title', 'on deck');
+      newCard.setAttribute('title', 'Unselected');
+      newCard.selected = false;
       newCard.textContent = suitsBack[index] + cardvalue;
       items = items+" "+suitsBack[index] + cardvalue;
       newCard.style.backgroundColor = "#ff0000";
+      newCard.style.textAlign = "center";
+      newCard.style.fontSize = "xxx-large";
  
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
@@ -404,28 +464,34 @@
 
   function passaction(){
     socket.emit('CTOS-PASS',pos);
+    notifyScreenReader("Round Passed!");
   }
 
   socket.on('STOC-PLAY-OVER',()=>{
     console.log("this play over .");
     const playedContainer = document.getElementById('container_played');
     playedContainer.innerHTML = "";
+    notifyScreenReader("Current Round Over")
   });
   
   socket.on('STOC-PLAYER-WON', (player_position) => {
     console.log("Player winned ", player_position);
     var player = document.getElementById(`user${player_position}`)
-    player.style.backgroundColor = "#97FF00";
+    player.parentElement.style.backgroundColor = "#97FF00";
     if(pos === player_position){
-      alert("Won!");
+      alert("You Won!");
     }
     else{
-      notifyScreenReader("Player winned : "+player_position, "assertive");
+      alert("Player winned : "+(player_position+1));
     }
   });
 
   socket.on('STOC-GAME-OVER',(wonUsers)=>{
-  console.log("GAME OVER ");
+  var gameOverMessage = "Game Over! Winners are : "
+  wonUsers.forEach((winner) => {
+    gameOverMessage = gameOverMessage.concat("User "+(winner+1)+", ")
+  });
+  alert(gameOverMessage);
   console.log("THE WINNERS ARE:",wonUsers);
   });
 
