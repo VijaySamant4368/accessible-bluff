@@ -7,6 +7,16 @@
 
   var socket = io();
 
+  console.log("Server IP address : "+location.host)
+
+  const audioFilesAddress = 'http://'+location.host+'/';
+
+  var audioRaiseTime = new Audio(audioFilesAddress+'rise-time.mp3');
+  var audioCardsShuffling = new Audio(audioFilesAddress+'cards-shuffling.mp3');
+  var audioCardsPlaced = new Audio(audioFilesAddress+'cards-placed.mp3');
+  var audioCardsRaised = new Audio(audioFilesAddress+'cards-raised.mp3');
+
+
   // To prevent adding listeners while sorting
   var listenNodeInserted = true;
 
@@ -186,10 +196,12 @@
     // Append loading animation and text elements to the card container
     cardContainer.innerHTML = '';
     cardContainer.appendChild(loadingAnimation);
+
     cardContainer.appendChild(textElement);
     // Remove loading animation and text elements after 4 seconds
     setTimeout(() => {
       cardContainer.innerHTML = '';
+      audioCardsShuffling.play();
     }, 3000);
   }
 
@@ -343,21 +355,25 @@
     const raiseSpinner = document.createElement('div');
     raiseSpinner.classList.add('loader');
     areaRaiseSpinner.appendChild(raiseSpinner);
+    audioRaiseTime.loop = true;
+    audioRaiseTime.play();
   });
 
   socket.on('STOC-RAISE-TIME-OVER', () => {
     console.log("raise time over")
+    audioRaiseTime.pause();
+    audioRaiseTime.currentTime = 0;
     const raiseBtn = document.getElementById('raise-btn')
     raiseBtn.disabled = true;
     notifyScreenReader("Raise time over!", "assertive");
     const areaRaiseSpinner = document.getElementById('rise-spinner-area');
     areaRaiseSpinner.innerHTML = "";
-
   });
 
   socket.on('STOC-GAME-PLAYED', (cardCount, bluffText) => {
     lastGameCardCount = cardCount;
     lastGameBluffText = bluffText;
+    audioCardsPlaced.play();
     if(cardCount == 0){
       notifyScreenReader("Passed!", "assertive");
       return;
@@ -390,6 +406,9 @@
   }  
   
   socket.on('STOC-SHOW-RAISED-CARDS', (poppedElements, poppedSuits, winner, loser) => {
+    audioRaiseTime.pause();
+    audioRaiseTime.currentTime = 0;
+    audioCardsRaised.play();
     console.log("openedcards:", poppedElements);
     // Get a reference to the OpenedCards div
     //var openedCardsDiv = document.querySelector('.OpenedCards');

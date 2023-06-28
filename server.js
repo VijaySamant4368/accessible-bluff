@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
   res.render('game');
 });
 var rcount;
-const roomCapacity = 3;//set roomcapacity
+const roomCapacity = 2;//set roomcapacity
 const roomCounts = {}
 io.on('connection', (socket) => {
   console.log("New connection established. User connected with ID:", socket.id);
