@@ -313,9 +313,14 @@
 
 
     if(newGame === true){
-      var bluff_text=prompt("Please enter bluff text","Bluff here");
+      var bluff_text=prompt("Please enter bluff text","");
       if (bluff_text==null){
         notifyScreenReader("Canceled!")
+        return;
+      }
+      bluff_text = bluff_text.toUpperCase();
+      if(["A","1","2","3","4","5","6","7","8","9","10","J","Q","K"].indexOf(bluff_text) == -1){
+        notifyScreenReader("Wrong bluff text! Please bluff with card name!")
         return;
       }
     }
