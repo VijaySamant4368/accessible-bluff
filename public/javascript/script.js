@@ -265,7 +265,12 @@
       newCard.style.backgroundColor = "#b963ee";
       newCard.style.fontSize = "xxx-large";
       newCard.style.textAlign = "center";
-      newCard.textContent = card.suit + card.value;
+      newCard.textContent = card.suit + card.value;      
+      if (card.suit === '♥' || card.suit === '♦') {
+        newCard.style.color = 'red';
+      } else {
+        newCard.style.color = 'black';
+      }
 
       // Append the card to the card container;
       cardContainer.appendChild(newCard);
