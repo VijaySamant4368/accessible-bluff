@@ -11,6 +11,7 @@
     /*border: solid;*/
     /*border-width: 1px;*/
     background-color: #cccccc;
+    margin-right: 5px;
   }
 
   .cards:focus {
@@ -139,3 +140,14 @@
   .right {
     right: 0;
   }
+
+  .back-card {
+    background-color: yellow;
+    width: 20px;
+    font-size: large   !important;
+    text-align: left;
+    margin-right: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  

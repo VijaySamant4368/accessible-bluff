@@ -246,6 +246,7 @@
     for(var i = 0, l = childrensArray.length; i < l; i++) {
       parent.appendChild(childrensArray[i]);
     }
+    mergeCards();
   }
 
   socket.on('STO1C-DRAW-CARDS', (subpartition) => {
@@ -352,6 +353,7 @@
     document.getElementById("place-btn").disabled = true;
     document.getElementById("raise-btn").disabled = true;
     notifyScreenReader("Cards placed!", "assertive");
+    mergeCards()
   }
 
   socket.on('STOC-RAISE-TIME-START', () => {
@@ -529,3 +531,27 @@
     // Handle the disconnection
     console.log('Disconnected from the server.');
   });
+
+  function mergeCards(){
+    const card_container = document.getElementById("card-container")
+    const container_children = card_container.childNodes
+    for (let card of container_children){
+      const text = card.id;
+      if (card.nextSibling != null){
+        if (card.nextSibling.id[1] === card.id[1])
+        {
+          card.classList.add("back-card")
+          card.textContent = ""
+          const letters = text.split("")
+          letters.forEach(letter => {
+            const span = document.createElement("span");
+            span.textContent = letter;
+            card.appendChild(span);
+          });
+        } else {
+          card.innerText = text
+          card.classList.remove("back-card")
+        }
+      }
+      }
+  }
